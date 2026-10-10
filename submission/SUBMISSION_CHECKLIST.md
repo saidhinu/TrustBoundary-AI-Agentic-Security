@@ -9,12 +9,12 @@
 - [x] GroupKFold synthetic-family ML-only evaluation script/report; 135/135 recall, not external validation.
 - [x] DOCX, PY, JS and Unicode inspection paths added and regression tested.
 - [x] PDF/PPTX v1.6 regenerated, based on latest evidenced results.
-- [x] Local v1.6 screenshots, 10-slide deck and 2m27 screenshot walkthrough generated; GitHub verification remains pending.
+- [x] Seven v1.6 screenshots, 10-slide PDF/PPTX and 2m27 narrated **screenshot** walkthrough published on GitHub; this is not an interactive demo recording.
 - [ ] v1.6 screenshot/video evidence and updated media checked from a signed-out browser.
-- [ ] GitHub source commit and fresh-checkout CI for v1.6 verified (previous v1.5 GitHub runs do not count).
+- [x] Public GitHub source at repository root and fresh-checkout GitHub Actions verification for v1.6 PASSED (source and media commits).
 - [ ] Public deepset official test split evaluated: pin-and-download script exists; download unavailable in build environment.
 - [ ] Live OpenAI model run: NOT verified (requires a newly generated secret; exposed key must be revoked).
-- [ ] Full Git history scanned with a dedicated gitleaks scan; pending external runner.
+- [x] CI ran the repository-provided high-confidence Git history key scanner without a detected match; dedicated gitleaks audit not performed.
 - [ ] Complete authenticated human review, originality statements and competition portal submission.
 
 ## Historical notes
