@@ -1,24 +1,17 @@
-# TrustBoundary v1.6 — Release verification checklist
+# TrustBoundary v1.7.0 — Reproducible release checklist
 
-- [x] Local working FastAPI/UI source and offline-first detector.
-- [x] 146 local automated tests including Unicode/encoding and Word/code ingestion tests.
-- [x] Original historical 42-case baseline retained at 58.3% recall (14/24).
-- [x] Reviewed 42-case known retest at 100% (24/24); 60-case known retest at 100% (30/30); neither is independent.
-- [x] Previously authored 40-case challenge remains at 35% (7/20); false-positive 1/20.
-- [x] 50 additional business emails measured: 2/50 false positives (4%).
-- [x] GroupKFold synthetic-family ML-only evaluation script/report; 135/135 recall, not external validation.
-- [x] DOCX, PY, JS and Unicode inspection paths added and regression tested.
-- [x] PDF/PPTX v1.6 regenerated, based on latest evidenced results.
-- [x] Seven v1.6 screenshots, 10-slide PDF/PPTX and 2m27 narrated **screenshot** walkthrough published on GitHub; this is not an interactive demo recording.
-- [ ] v1.6 screenshot/video evidence and updated media checked from a signed-out browser.
-- [x] Public GitHub source at repository root and fresh-checkout GitHub Actions verification for v1.6 PASSED (source and media commits).
-- [ ] Public deepset official test split evaluated: pin-and-download script exists; download unavailable in build environment.
-- [ ] Live OpenAI model run: NOT verified (requires a newly generated secret; exposed key must be revoked).
-- [x] CI ran the repository-provided high-confidence Git history key scanner without a detected match; dedicated gitleaks audit not performed.
-- [ ] Complete authenticated human review, originality statements and competition portal submission.
-
-## Historical notes
-
-v1.2.1 had 82 tests; v1.3 had 100; v1.4 had 112; v1.5 had 124. These are historical release counts. v1.6 currently has 146 local passing tests. Keep these distinct from benchmark case counts.
-
-Deadline according to event brief: 11 October 2026, 23:59 IST. No Unstop submission has been made or confirmed in this workflow.
+- [x] Local runnable FastAPI source, offline detection, deterministic mock tools and independent authorization.
+- [x] Optional structured hosted LLM judge, mock model-tool proposal comparison, per-conversation risk and security headers.
+- [x] DOCX hidden text, code, image OCR and scanned-PDF OCR paths with offline tests.
+- [x] Judge-supplied 50-case baseline saved BEFORE changes: 8/30 attacks, 0/20 false positives (v1.6).
+- [x] Feedback-informed v1.7 retest on same 50 cases: 28/30 attacks, 0/20 false positives (not blind).
+- [x] Previously reviewed 40-case challenge tested on v1.7: 10/20 attacks, 2/20 false positives.
+- [x] All local tests and package integrity rechecked before release.
+- [x] Updated PPTX/PDF v1.7 created from measured results.
+- [x] Dockerfile + .dockerignore + MIT license prepared.
+- [ ] Independent public deepset benchmark result. The dataset webpage shows conflicting license metadata; verify upstream terms before reuse.
+- [ ] Real OpenAI authenticated LLM accuracy, false-positive, latency and actual-model mock-tool attack-success counts.
+- [ ] Separate genuinely blind sealed holdout from an independent evaluator.
+- [ ] Live participant-narrated browser walkthrough (existing narrated slideshow is not a live recording).
+- [ ] Authenticated public HTTPS deployment and signed-out artifact playback.
+- [ ] Competition portal submission receipt (outside scope).

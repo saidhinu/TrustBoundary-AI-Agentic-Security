@@ -1,3 +1,4 @@
+from trustboundary import __version__
 """Reviewer-reported bypass regressions and policy-independent fail-closed tests."""
 import pytest
 from fastapi.testclient import TestClient
@@ -67,4 +68,4 @@ def test_scan_api_quote_following_instruction_quarantined():
 
 
 def test_api_release_version():
-    assert TestClient(app).get('/health').json()['version']=='1.6.0'
+    assert TestClient(app).get('/health').json()['version']==__version__

@@ -41,7 +41,7 @@ def bg(sl,n,kicker,title,subtitle=''):
  if subtitle:text(sl,subtitle,.59,1.78,11.9,.58,13,MUTED)
  rect(sl,.55,7.16,12.2,.008,'304259')
  text(sl,'ET × ACCENTURE AI HACKATHON 2026 · AGENTIC EDITION',.61,7.2,8,.2,8,MUTED)
- text(sl,'v1.6 · F3–D1 · SYNTHETIC SANDBOX',9.2,7.2,3.5,.2,8,MUTED,align=PP_ALIGN.RIGHT)
+ text(sl,'v1.7 · F3–D1 · SYNTHETIC SANDBOX',9.2,7.2,3.5,.2,8,MUTED,align=PP_ALIGN.RIGHT)
 
 def new(n,k,t,s=''):
  sl=r.slides.add_slide(r.slide_layouts[6]);bg(sl,n,k,t,s);return sl
@@ -121,14 +121,14 @@ sl=new(7,'measured evidence','Safety evaluation: results depend on the test dist
 for i,(label,recall,detail,desc,color) in enumerate([
   ('PRE-FIX BASELINE',f"{OLD['recall']:.1%}",'14 / 24 attacks detected','42 known cases; 1 benign FP',RED),
   ('FEEDBACK RETEST',f"{json.loads((ROOT/'reports'/'frozen_v13_challenge_retest_v14_metrics.json').read_text())['recall']:.1%}",'30 / 30 attacks detected','60 known cases, tuned to feedback',TEAL),
-  ('NEW CHALLENGE',f"{CHALLENGE['recall']:.1%}",'7 / 20 attacks detected','40 new authored cases; 1 benign FP',GOLD)]):
+  ('NEW CHALLENGE',f"{CHALLENGE['recall']:.1%}",'10 / 20 attacks detected','40 previously reviewed cases; 2 benign FP',GOLD)]):
  x=.75+i*4.25;rect(sl,x,2.60,3.95,2.92,PANEL,True)
  text(sl,label,x+.2,2.89,3.58,.34,13,MUTED,True)
  text(sl,recall,x+.2,3.41,3.56,.70,37,color,True)
  text(sl,detail,x+.2,4.22,3.56,.34,15,WHITE,True)
  text(sl,desc,x+.2,4.70,3.5,.55,12,MUTED)
 rect(sl,.77,5.79,11.98,.76,PANEL2,True)
-text(sl,'F3–D1. Forty-case challenge misses 13/20 attacks; 50 benign emails have 2 false alerts; no external score claimed.',.94,5.98,11.56,.47,13,GOLD,True)
+text(sl,'F3–D1. Known 40-case challenge misses 10/20 attacks; v1.7 judge feedback set is 28/30 (NOT blind). No live hosted score.',.94,5.98,11.56,.47,13,GOLD,True)
 
 # 8 EGO screen
 sl=new(8,'quality engineering','EGO measures safety AND usefulness.','Security that breaks every legitimate workflow is not a viable enterprise product.')
@@ -149,7 +149,7 @@ text(sl,'Financial-impact dashboard uses editable hypothetical assumptions; no r
 
 # 10 roadmap and judge ask
 sl=new(10,'submission','Runnable, measurable, and clear about limitations.','Working local prototype + source tests + case-level evidence + pitch materials.')
-for idx,(label,desc) in enumerate([('TODAY','Run the protected fintech workflow, evaluate, inspect traces.'),('NEXT','Public external benchmark pending; live OpenAI unverified; new 40-case recall 35.0%.'),('FOR PRODUCTION','Multitenant auth, audit hardening, SIEM, OCR, rate limits, independent security review.')]):
+for idx,(label,desc) in enumerate([('TODAY','Run the protected fintech workflow, evaluate, inspect traces.'),('NEXT','Public external benchmark pending; live OpenAI unverified; new 40-case recall 50.0%.'),('FOR PRODUCTION','Multitenant auth, audit hardening, SIEM, OCR, rate limits, independent security review.')]):
  y=2.42+idx*1.22;rect(sl,.89,y,11.45,.99,PANEL,True);text(sl,label,1.16,y+.25,2.6,.34,14,TEAL,True);text(sl,desc,3.57,y+.23,8.35,.54,14,WHITE)
 text(sl,'Repository: github.com/saidhinu/TrustBoundary-AI-Agentic-Security',.86,6.09,11.85,.38,15,MUTED,True)
 text(sl,'TrustBoundary: provenance before permission.',1.1,6.37,10,.45,22,TEAL,True)

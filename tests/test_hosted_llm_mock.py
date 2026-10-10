@@ -12,8 +12,8 @@ class FakeClient:
     def post(self, url, **kwargs):
         assert url=="https://api.openai.com/v1/chat/completions"
         assert kwargs["headers"]["Authorization"]=="Bearer test-token-mock"
-        assert kwargs["json"]["response_format"]["type"]=="json_object"
-        result={"choices":[{"message":{"content":json.dumps({"categories":["Instruction Override"]})}}]}
+        assert kwargs["json"]["response_format"]["type"]=="json_schema"
+        result={"choices":[{"message":{"content":json.dumps({"contains_agent_directed_instruction":True,"categories":["Instruction Override"],"evidence_span":"", "confidence":0.93})}}]}
         return httpx.Response(200,request=httpx.Request("POST",url),json=result)
 
 def test_hosted_llm_success_is_advisory(monkeypatch):

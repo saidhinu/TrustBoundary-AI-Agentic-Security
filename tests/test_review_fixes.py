@@ -1,3 +1,4 @@
+from trustboundary import __version__
 from trustboundary.agent import run
 from trustboundary.detection import Detector
 from fastapi.testclient import TestClient
@@ -89,6 +90,6 @@ def test_quarantined_content_never_reaches_business_answer():
 
 def test_live_api_version_matches_visible_release():
  health=TestClient(app).get('/health').json()
- assert health['version']=='1.6.0'
+ assert health['version']==__version__
  html=TestClient(app).get('/').text
  assert 'id="appVersion"' in html and 'F3–D1 Evidence' in html and 'F3–D2 Evidence' not in html

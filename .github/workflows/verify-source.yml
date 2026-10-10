@@ -1,4 +1,4 @@
-name: Verify TrustBoundary v1.6 source
+name: Verify TrustBoundary v1.7 source
 on:
   push:
     branches: [main]
@@ -21,12 +21,16 @@ jobs:
         with:
           python-version: '3.11'
           cache: pip
+      - name: Install OCR binary
+        run: sudo apt-get update && sudo apt-get install -y tesseract-ocr
       - name: Install dependencies
         run: python -m pip install -r requirements.txt
       - name: Scan Git history for high-confidence secrets
         run: python scripts/scan_git_secrets.py
       - name: Run automated tests
         run: python -m pytest -q
+      - name: Judge-authored 50-case feedback-informed development check
+        run: python scripts/evaluate_adversarial.py --corpus evaluation_inputs/judge_v16_dev_after_review.json --name ci_judge_development
       - name: Historical 42-case evidence
         run: bash scripts/reproduce_baseline_v121.sh
       - name: Re-evaluate known 40-case challenge
