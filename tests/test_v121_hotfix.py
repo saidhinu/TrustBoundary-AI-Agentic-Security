@@ -67,4 +67,4 @@ def test_scan_api_quote_following_instruction_quarantined():
 
 
 def test_api_release_version():
-    assert TestClient(app).get('/health').json()['version']=='1.4.0'
+    assert TestClient(app).get('/health').json()['version']=='1.5.0'
