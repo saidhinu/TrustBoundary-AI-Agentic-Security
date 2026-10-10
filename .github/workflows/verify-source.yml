@@ -1,4 +1,4 @@
-name: Verify TrustBoundary v1.4 reproducibility
+name: Verify TrustBoundary v1.5 reproducibility
 on:
   push:
     branches: [main]
