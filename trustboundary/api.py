@@ -12,7 +12,7 @@ from .fixtures import SCENARIOS,CATEGORIES,evaluation_dataset
 from . import traces
 
 BASE=Path(__file__).resolve().parent.parent
-app=FastAPI(title='TrustBoundary AI',version='1.2.0',description='Provenance-aware agentic injection firewall; SYNTHETIC sandbox only')
+app=FastAPI(title='TrustBoundary AI',version='1.2.1',description='Provenance-aware agentic injection firewall; SYNTHETIC sandbox only')
 app.mount('/assets',StaticFiles(directory=str(BASE/'web')),name='assets')
 
 class ScanIn(BaseModel):
@@ -39,7 +39,7 @@ class ROIIn(BaseModel):
 @app.get('/')
 def index(): return FileResponse(BASE/'web'/'index.html')
 @app.get('/health')
-def health(): return {'status':'ok','mode':'synthetic_sandbox','llm_configured':bool(os.getenv('OPENAI_API_KEY')),'local_ml_enabled':os.getenv('TB_ENABLE_LOCAL_ML','1')!='0','version':'1.2.0'}
+def health(): return {'status':'ok','mode':'synthetic_sandbox','llm_configured':bool(os.getenv('OPENAI_API_KEY')),'local_ml_enabled':os.getenv('TB_ENABLE_LOCAL_ML','1')!='0','version':'1.2.1'}
 @app.get('/scenarios')
 def scenarios(): return {'scenarios':SCENARIOS,'categories':CATEGORIES}
 @app.post('/scan')
