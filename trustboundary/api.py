@@ -63,7 +63,7 @@ class ROIIn(BaseModel):
 @app.get('/')
 def index(): return FileResponse(BASE/'web'/'index.html')
 @app.get('/health')
-def health(): return {'status':'ok','mode':'synthetic_sandbox','llm_configured':bool(os.getenv('OPENAI_API_KEY')),'local_ml_enabled':os.getenv('TB_ENABLE_LOCAL_ML','1')!='0','hosted_validation':'not_run_by_health_check','version':'1.5.0'}
+def health(): return {'status':'ok','mode':'synthetic_sandbox','llm_configured':False,'personal_key_supported':True,'local_ml_enabled':os.getenv('TB_ENABLE_LOCAL_ML','1')!='0','hosted_validation':'not_run_by_health_check','version':'1.5.0'}
 @app.get('/scenarios')
 def scenarios(): return {'scenarios':SCENARIOS,'categories':CATEGORIES}
 @app.post('/settings/test')
