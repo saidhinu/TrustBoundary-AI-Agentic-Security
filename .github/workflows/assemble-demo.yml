@@ -1,0 +1,28 @@
+name: Assemble verified v1.4 narrated demo
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'submission/media_chunks/**'
+      - '.github/workflows/assemble-demo.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  video:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Assemble and verify video
+        run: python3 scripts/assemble_demo_video.py
+      - name: Publish MP4 on main
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add submission/TrustBoundary_Demo_Walkthrough_Narrated.mp4
+          if ! git diff --cached --quiet; then
+            git commit -m "Publish hash-verified v1.4 narrated demo video"
+            git push origin main
+          fi
