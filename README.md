@@ -1,4 +1,4 @@
-# TrustBoundary AI · Agentic Security Control Plane (v1.2.1)
+# TrustBoundary AI · Agentic Security Control Plane (v1.4.0)
 
 **ET × Accenture AI Hackathon 2026 — Agentic Edition**  
 **Problem 2: Agentic Cybersecurity — Prompt Injection Firewall**
@@ -8,6 +8,9 @@
 **Status:** Working prototype, **not production security software**. Only fake transactions, mock tools, synthetic content, and dummy canaries. The default offline scanner is a **hybrid local ML + heuristic detector** (TF-IDF and logistic regression trained on development-only synthetic fixtures), not a validated production model; a hosted LLM can optionally supply advisory classification.
 
 ## Quick start — from repository root
+
+The source code now belongs directly in this repository's root. After cloning, run the commands below **without changing into a `TrustBoundary_AI 2` directory**. The original nested upload folder was removed.
+
 
 ```bash
 python -m venv .venv
@@ -105,6 +108,8 @@ python -c 'from trustboundary.evaluation import evaluate; import json; print(jso
 
 Reports produced under `reports/`: `metrics.json`, `evaluation.csv`, `false_positives.csv`, `false_negatives.csv`.
 
+**Reviewer-adversarial check (separate, feedback-informed):** A new 42-case manually authored set contains 24 attacks and 18 benign controls. Offline results: **14 TP, 10 FN, 1 FP, 17 TN** (58.3% recall, 93.3% precision, 5.6% false-positive rate), with **10 malicious texts allowed through and zero unauthorized mock tool executions**. This is materially weaker than the templated frozen benchmark and shows remaining detection limitations. Full cases and results are in `tests/adversarial_review_cases.json`, `reports/adversarial_review_metrics.json` and `reports/adversarial_review_cases.csv`. Do not describe these tests as blind external certification. Re-run using `python scripts/evaluate_adversarial.py`.
+
 **Benchmark facts:** 320 synthetic examples total (180 attack, 120 benign, 20 quoted/ambiguous), with 80 held out using one phrasing variant for each attack type. These examples are authored from a small number of templates, so high measured performance is **not real-world evidence of generalization**. Detection and policy-enforcement metrics are separate. The deliberately insecure control is a *scripted simulation*, never presented as a real vulnerable language model. Test outcome counts and run timestamps are generated during evaluation, not hardcoded into the dashboard.
 
 ## Submission scope and claims
@@ -145,7 +150,7 @@ To reproduce screenshots, slide deck and narrated capture, install `requirements
 
 **Maintainer:** Dhinesh Babu Venkatesan · [GitHub repository](https://github.com/saidhinu/TrustBoundary-AI-Agentic-Security).
 
-See [docs/REVIEW_FIXES.md](docs/REVIEW_FIXES.md) for changes and verified tests. The defensible scope is **F3–D1**, not claimed D2 or D3. The workflow now parses the *authorized user task* separately, respects settlement IDs and no-ticket requests, derives task completion from performed operations, and withholds detected malicious external content. A limited `POST /scan/sequence` endpoint demonstrates a role-escalation / tool-action sequence; this is not broad multi-turn protection. Reported benchmark results remain synthetic and overfit to narrow templates; hosted LLM validation remains untested.
+See [docs/REVIEW_FIXES.md](docs/REVIEW_FIXES.md) for changes and verified tests. The defensible scope is **F3–D1**, not claimed D2 or D3. The workflow now parses the *authorized user task* separately, respects settlement IDs and no-ticket requests, derives task completion from performed operations, and withholds detected malicious external content. A limited `POST /scan/sequence` endpoint demonstrates a role-escalation / tool-action sequence; this is not broad multi-turn protection. Reported benchmark results remain synthetic and overfit to narrow templates; hosted LLM validation remains untested. The separately reported 42-case adversarial review identified 10 missed attacks.
 
 ```bash
 python -m pytest -q
@@ -163,14 +168,51 @@ python -m uvicorn trustboundary.api:app --port 8000
 - API health, UI, and documentation use **v1.2 / F3–D1**, with D2 reserved for stronger external evaluation.
 - The intentionally vulnerable comparison remains a SCRIPTED synthetic baseline, not a real attacked LLM. The revised video reflects v1.2 but uses synthetic narration.
 
+## Reviewer hotfix v1.4.0 — 10 October 2026
 
-## October 10 security hotfix — v1.2.1
+- **Quoted instruction activation:** Detects external requests that direct an agent to execute a quoted malicious example. Educational quotations with no activation still pass the regression checks.
+- **ML-only / LLM-only safe handling:** When the detector reports malicious content but the sanitizer cannot identify any removable span, it changes from SANITIZE to QUARANTINE and forwards **no content**. Tool permissions always remain governed by deterministic policy.
+- **Regression suite:** 82 tests passed locally (70 previous + 12 new). This does not certify unseen attacks.
+- **Separate adversarial corpus:** 42 additional manually labeled cases; 10 of 24 attacks were missed and 1 of 18 benign controls was flagged. This is a key limitation and does not support a D2 claim.
+- **Release:** `/health` returns `1.2.1`; UI shows `Prototype v1.4.0`; F3–D1 remains provisional. The pitch and original narrated video describe the v1.2 line, and have not been re-recorded for this patch. Human narration is preferable if submitting.
 
-- Detect a malicious instruction inside a quote when surrounding text orders the agent to execute it; ordinary educational examples remain permitted in regression tests.
-- Fix sanitization mismatch: when ML or hosted LLM flags suspicious content but no removable rule span is found, the input is **QUARANTINED** and no content is forwarded.
-- **82 automated tests passed locally**, including twelve new feedback-informed regression cases. The older 63/70 totals refer to previous releases.
-- Separate feedback-informed adversarial sample (not blind): 24 attacks and 18 benign; 14 TP, 10 FN, 1 FP, 17 TN. **Detection recall only 58.3%**, precision 93.3%, benign false-positive rate 5.6%, and zero unauthorized mock tool actions. Do not extrapolate the original template-based benchmark to unfamiliar attacks.
-- The OpenAI hosted model remains optional and not independently tested. The classification output does not grant tool permissions.
-- Existing pitch video is a v1.2 demonstration and does not prove the latest v1.2.1 hotfix. **Unstop registration and final submission are separate and unconfirmed.**
+**Publication:** Complete source, web UI, tests, reports and submission media are published at the repository root. The GitHub repository is the code source of truth; the Unstop portal submission is separate and is not verified here.
 
-For adversarial findings see [docs/adversarial_review.md](docs/adversarial_review.md). Run `python -m pytest -q` from the repository root.
+
+## Reproducible adversarial evaluation — v1.4.0
+
+Historical **pre-fix v1.2.1** 42-case data is frozen as `reports/adversarial_baseline_v121_{metrics.json,cases.csv}`. Re-run the same unmodified corpus with:
+
+```bash
+python scripts/evaluate_adversarial.py --name adversarial_retest_v13
+python scripts/evaluate_adversarial.py --corpus tests/unseen_20261010.json --name unseen_20261010_v13
+python -m pytest -q
+```
+
+The post-fix and newly authored challenge reports are separate; **never overwrite historical v1.2.1 results**. Both sets are author-produced synthetic evaluation and are not independently blind. LLM hosted mode is unverified and never called by the offline evaluator. F3–D1 remains provisional; do not claim D2.
+
+For submission state and limitations, see `submission/SUBMISSION_CHECKLIST.md`.
+
+
+## v1.4 security update (October 10, 2026)
+
+The 42-case baseline (v1.2.1) and the first 60-case v1.3 evaluation are frozen and remain downloadable. Additional lexical/contextual detectors address previously missed role impersonation, token requests, payment redirection, and HTML tag handling, plus two documented benign false positives. The next set is feedback-informed, not blind generalization proof. Hosted OpenAI remains opt-in and requires a user-supplied key. The tool authorization layer remains independent of all detectors.
+
+## Reproduce all adversarial evidence (v1.4)
+
+```bash
+python -m pytest -q
+# Historical 58.3% result from exact v1.2.1 Git commit, with current evaluator/data
+bash scripts/reproduce_baseline_v121.sh
+# Reviewer-informed case retest using the CURRENT version
+python scripts/evaluate_adversarial.py --corpus tests/adversarial_review_cases.json --name manual_42_current
+python scripts/evaluate_adversarial.py --corpus tests/unseen_20261010.json --name feedback_60_current
+# Separately frozen challenge authored after v1.4 rule changes
+python scripts/evaluate_adversarial.py --corpus tests/new_challenge_v14_frozen.json --name frozen_new_40_current
+# Optional LIVE OpenAI evaluation -- paid user API key required; never put keys in Git
+python scripts/evaluate_openai_live.py --max-cases 10
+```
+
+**Do not mix cohorts.** The historical v1.2.1 baseline detected 14/24 attacks (58.3% recall), the feedback-informed v1.4 retest of the earlier 60-case challenge detected 30/30, while the new 40-case challenge detected only 7/20 (35% recall) and flagged 1/20 benign examples. All three are manually authored, limited-scope sets; the last is a new diagnostic, not independent certification. The original 80-case synthetic template holdout detects 45/45 attacks and is not evidence of open-world robustness. Published case-level results document misses rather than hiding them.
+
+**Live OpenAI status:** `OPENAI_API_KEY` is absent from this release and real hosted responses have NOT been verified. `tests/test_v14_hosted_failures.py` tests mock 401/429/503, bad JSON/category schema, spurious model flags and offline fallback. Add a key only to a private environment; consult `scripts/evaluate_openai_live.py`. The API and mock tools are not suitable for real finance production workloads.

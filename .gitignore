@@ -1,7 +1,10 @@
 __pycache__/
 .pytest_cache/
+.venv/
 .env
 *.pyc
 *.sqlite3
 *.db
 .DS_Store
+reports/openai_live_aggregate.json
+reports/openai_live_cases.csv
