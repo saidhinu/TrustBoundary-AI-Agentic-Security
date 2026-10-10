@@ -1,4 +1,4 @@
-# TrustBoundary AI · Agentic Security Control Plane
+# TrustBoundary AI · Agentic Security Control Plane (v1.2.1)
 
 **ET × Accenture AI Hackathon 2026 — Agentic Edition**  
 **Problem 2: Agentic Cybersecurity — Prompt Injection Firewall**
@@ -7,7 +7,7 @@
 
 **Status:** Working prototype, **not production security software**. Only fake transactions, mock tools, synthetic content, and dummy canaries. The default offline scanner is a **hybrid local ML + heuristic detector** (TF-IDF and logistic regression trained on development-only synthetic fixtures), not a validated production model; a hosted LLM can optionally supply advisory classification.
 
-## Quick start
+## Quick start — from repository root
 
 ```bash
 python -m venv .venv
@@ -162,3 +162,15 @@ python -m uvicorn trustboundary.api:app --port 8000
 - SANITIZE now conservatively filters suspicious sentences while keeping safe standalone ones as data; QUARANTINE still withholds the entire untrusted source. Downstream agent output includes a safe data-only excerpt when available, never authorizes tool actions from the source.
 - API health, UI, and documentation use **v1.2 / F3–D1**, with D2 reserved for stronger external evaluation.
 - The intentionally vulnerable comparison remains a SCRIPTED synthetic baseline, not a real attacked LLM. The revised video reflects v1.2 but uses synthetic narration.
+
+
+## October 10 security hotfix — v1.2.1
+
+- Detect a malicious instruction inside a quote when surrounding text orders the agent to execute it; ordinary educational examples remain permitted in regression tests.
+- Fix sanitization mismatch: when ML or hosted LLM flags suspicious content but no removable rule span is found, the input is **QUARANTINED** and no content is forwarded.
+- **82 automated tests passed locally**, including twelve new feedback-informed regression cases. The older 63/70 totals refer to previous releases.
+- Separate feedback-informed adversarial sample (not blind): 24 attacks and 18 benign; 14 TP, 10 FN, 1 FP, 17 TN. **Detection recall only 58.3%**, precision 93.3%, benign false-positive rate 5.6%, and zero unauthorized mock tool actions. Do not extrapolate the original template-based benchmark to unfamiliar attacks.
+- The OpenAI hosted model remains optional and not independently tested. The classification output does not grant tool permissions.
+- Existing pitch video is a v1.2 demonstration and does not prove the latest v1.2.1 hotfix. **Unstop registration and final submission are separate and unconfirmed.**
+
+For adversarial findings see [docs/adversarial_review.md](docs/adversarial_review.md). Run `python -m pytest -q` from the repository root.
