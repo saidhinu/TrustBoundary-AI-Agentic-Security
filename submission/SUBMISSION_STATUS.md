@@ -1,7 +1,11 @@
-# Submission status — 10 October 2026
+# TrustBoundary AI v1.4 submission status (10 October 2026)
 
-**GitHub application source:** published at repository root on `main`; code, frontend, tests, docs and submission assets can be browsed publicly.
-**Release:** v1.2.1; provisional F3–D1; locally 82 automated tests passed including feedback-informed reviewer tests.
-**Security evaluation:** separate 42-case adversarial review returned 14/24 attack detections, 10 misses, and 1/18 benign flagged; see `docs/adversarial_review.md`. No independent or hosted-LLM validation. Do not claim D2.
-**Presentation/video:** the existing 10-slide deck and narrated video are v1.2 demonstrations and have **not** been re-recorded for the v1.2.1 patch.
-**Unstop:** no official competition submission receipt has been verified. Public GitHub publication is not the same as competition submission.
+**Source:** public GitHub repository: https://github.com/saidhinu/TrustBoundary-AI-Agentic-Security. Check commit and root-level file availability after every publication.
+
+**Locally verified:** 112 tests passed; deterministic offline smoke checks; historical v1.2.1 42-case reproduction 14 TP/10 FN/1 FP/17 TN; reviewer-informed known-case 60-case retest 30 TP; newly authored 40-case challenge 7 TP/13 FN/1 FP/19 TN. This is not production-ready or independently blind testing.
+
+**Claim:** provisional F3-D1 only. Hosted LLM requests were NOT live-tested because no OpenAI API credentials are available. Mocked success/error/timeout/fallback behavior is tested. Video narration is synthesized and not a human recording.
+
+**Presentation:** v1.4 PPTX and PDF and approx. 2m32s narrated video provided; these are local deliverables until separately verified on the public repository.
+
+**Unstop:** intentionally excluded from this work by user request; do not claim a submission or receipt.

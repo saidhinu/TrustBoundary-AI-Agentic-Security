@@ -40,3 +40,11 @@ Follow-up reviewer probes disclosed two additional misses in v1.1:
 For `SANITIZE` results, the scanner now splits text conservatively into sentence-like spans, drops sentences containing attack indicators, and returns safe standalone sentences as data. The protected mock agent displays a short *data-only* sanitized excerpt while sourcing tool use **only** from its separately authorized task. `QUARANTINE` forwards nothing. Tests verify each behavior.
 
 The regression suite has **70 passing tests** including seven new follow-up tests; the 80-case synthetic benchmark is separate, templated and unsuitable for D2 reliability claims. **Self-declared maturity remains F3–D1** subject to judging review. Real LLM evaluation, production-grade HTML/PDF sanitization, stronger adversarial coverage and authentic human approvals remain out of scope.
+
+## v1.2.1 follow-up (October 10, 2026)
+
+Previously documented 63-pass and 70-pass totals are **historical**. Latest local test suite: **82 passed**. The main API and UI were updated to v1.2.1. Quoted instructions that are later commanded to execute are inspected; ML-only and LLM-only suspicious material without removable spans is quarantined rather than forwarded unchanged.
+
+The separate 42-case, feedback-informed adversarial set reported **14/24 attacks detected, 10 missed, 1/18 benign flagged**. It was neither used for training nor blind externally supplied; a substantial generalization gap remains. Refer to `reports/adversarial_review_metrics.json` and `docs/adversarial_review.md`.
+
+Publication note: full source is now at GitHub repository root (not the original `TrustBoundary_AI 2/` wrapper). Old notes warning that GitHub source was missing describe the situation *before* upload and are superseded.

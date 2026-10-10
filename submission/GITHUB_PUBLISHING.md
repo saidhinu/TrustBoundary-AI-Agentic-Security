@@ -1,32 +1,11 @@
-# GitHub publishing checklist — TrustBoundary AI v1.2
+# GitHub publishing and reproducibility — v1.4
 
-Repository: https://github.com/saidhinu/TrustBoundary-AI-Agentic-Security
+The expected public structure is rooted at `trustboundary/`, `web/`, `tests/`, `scripts/`, `reports/`, `docs/`, and `submission/`; no nested `TrustBoundary_AI 2/` directory.
 
-**As of this package's creation, the public repository does not contain the project source. Do not link it as a working proof until you verify a fresh clone.**
+1. Verify code and reproducibility artifacts at `https://github.com/saidhinu/TrustBoundary-AI-Agentic-Security`.
+2. Run `python -m pip install -r requirements.txt` and `python -m pytest -q` from a fresh clone.
+3. Run `bash scripts/reproduce_baseline_v121.sh` and inspect `docs/adversarial_review.md`.
+4. Check the PDF, PPTX, and narrated MP4 via anonymous browser URLs. If large media is not in GitHub, use the packaged release ZIP and publish through GitHub browser or Desktop; do not claim it has been uploaded.
+5. Never commit API credentials, customer data, local SQLite databases, or `.env`.
 
-Upload the CONTENTS of the `TrustBoundary_AI` folder to the repository root; replace the stale root README and UPLOAD_STATUS.md. Keep the directories `trustboundary/`, `web/`, `tests/`, `docs/`, `scripts/`, `reports/`, and `submission/`. GitHub's browser upload may limit number of files; Git on a machine is recommended.
-
-Preferred command-line route after extracting this ZIP:
-
-```bash
-cd TrustBoundary_AI
-git init
-git remote add origin https://github.com/saidhinu/TrustBoundary-AI-Agentic-Security.git
-git fetch origin
-git checkout -b main origin/main
-git add .
-git commit -m 'Publish TrustBoundary v1.2 runnable source and reviewer fixes'
-git push origin main
-```
-
-If remote tracking setup fails, clone repository to an empty directory, then copy the `TrustBoundary_AI` contents into it and run `git add`, `git commit`, `git push`. Do **not** publish `.env`, real payment data, secrets, local `data/*.sqlite3` or `__pycache__`.
-
-Verify fresh clone in clean Python environment:
-
-```bash
-python -m pip install -r requirements.txt
-python -m pytest -q
-python -m uvicorn trustboundary.api:app --host 127.0.0.1 --port 8000
-```
-
-Expected tests: 70 passed. Verify `/health` includes `1.2.0`, UI says `v1.2` / `F3–D1`, and the two revised bypass probes return QUARANTINE. Then inspect deck and demo video before submitting on Unstop.
+The application is a synthetic prototype. The optional hosted OpenAI classifier was tested with mocks only. The official Unstop portal is deliberately outside this release workflow by user request.

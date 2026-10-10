@@ -1,16 +1,20 @@
-# Submission Checklist — User Account Actions
+# TrustBoundary submission checklist — v1.4.0
 
-- [x] Working local prototype source packaged, tested and runnable.
-- [x] Detailed technical structural architecture provided.
-- [x] Evaluation JSON and raw per-case CSV included (synthetic, caveated).
-- [x] PDF/PPTX pitch deck generated from actual source and test report.
-- [x] A 2-minute-32-second narrated, captioned walkthrough MP4 captured from the running application.
-- [ ] Publish `TrustBoundary_AI` to a **public GitHub repository** with participant's authenticated account (not possible without a connected GitHub account).
-- [ ] Publish a working demo at a publicly reachable URL if requested by the portal (this local prototype is not an externally deployed service).
-- [ ] Upload demo video to a link accessible to judges, verify playback publicly.
-- [ ] Submit repository URL, slide deck and 2–4 minute demo video to official Unstop portal.
-- [ ] Verify AI assistance disclosure/originality rules and confirm event registration eligibility.
+- [x] Public GitHub source at repository root; verify every v1.4 file and artifact after publication.
+- [x] Working local prototype with synthetic fintech workflow and deterministic tool authorization.
+- [x] Historical 42-case corpus, original evaluator and **pre-fix** baseline CSV/metrics preserved; compare against post-fix results.
+- [x] Added a separate 60-case authored challenge set; see tests/unseen_20261010.json and distinct report.
+- [x] Proposed self-rating remains **F3–D1**. Neither synthetic suite shows production security or independently verified D2 reliability.
+- [x] PDF and PPTX pitch deck updated locally to v1.4 with both adversarial and template metrics.
+- [x] 2–4 minute synthetic-narration demo updated locally to v1.4; recommend participant's own recorded narration.
+- [ ] Verify playback/download of actual judge-accessible repository, video and deck hyperlinks (prefer browser signed-out test).
+- [x] Hosted OpenAI protocol, invalid output, false-positive and timeout/401/429/503 fallback validated with local mocks.
+- [ ] Live OpenAI HTTP requests/false-positive rate remain **UNVERIFIED** without user-supplied API key; run `scripts/evaluate_openai_live.py` privately.
+- [ ] Deploy reachable hosted demo if specifically required; the prototype currently runs locally only.
+- [ ] Submit links to official Unstop event from the registered participant account and **retain a confirmation receipt**.
+- [ ] Confirm contest disclosure/originality/participant rules.
 
-**Official Phase 2 cutoff:** October 11, 2026, 11:59 PM India Standard Time.
+**Older 55, 63, 70 and 82 test results are historical v0.9–v1.2.1 releases, not the current suite.**
+**Event deadline in original documentation: October 11, 2026 23:59 IST.**
 
-**No false claim:** The baseline is an intentionally vulnerable scripted reference; benchmark measures templated synthetic attacks only. Do not label this production-proven or a guaranteed winner.
+**Current v1.4 metrics:** 112 local automated tests; historical 42-case 58.3% recall; feedback-informed prior 60-case retest 100%; newly authored 40-case challenge 35% recall (7/20), 1/20 benign false positive. Do not confuse older 63/70/82/100 suites with v1.4.
