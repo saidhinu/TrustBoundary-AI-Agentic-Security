@@ -1,4 +1,4 @@
-# TrustBoundary AI · Agentic Security Control Plane (v1.4.0)
+# TrustBoundary AI · Agentic Security Control Plane (v1.5.0)
 
 **ET × Accenture AI Hackathon 2026 — Agentic Edition**  
 **Problem 2: Agentic Cybersecurity — Prompt Injection Firewall**
@@ -168,18 +168,18 @@ python -m uvicorn trustboundary.api:app --port 8000
 - API health, UI, and documentation use **v1.2 / F3–D1**, with D2 reserved for stronger external evaluation.
 - The intentionally vulnerable comparison remains a SCRIPTED synthetic baseline, not a real attacked LLM. The revised video reflects v1.2 but uses synthetic narration.
 
-## Reviewer hotfix v1.4.0 — 10 October 2026
+## Reviewer hotfix v1.5.0 — 10 October 2026
 
 - **Quoted instruction activation:** Detects external requests that direct an agent to execute a quoted malicious example. Educational quotations with no activation still pass the regression checks.
 - **ML-only / LLM-only safe handling:** When the detector reports malicious content but the sanitizer cannot identify any removable span, it changes from SANITIZE to QUARANTINE and forwards **no content**. Tool permissions always remain governed by deterministic policy.
 - **Regression suite:** 82 tests passed locally (70 previous + 12 new). This does not certify unseen attacks.
 - **Separate adversarial corpus:** 42 additional manually labeled cases; 10 of 24 attacks were missed and 1 of 18 benign controls was flagged. This is a key limitation and does not support a D2 claim.
-- **Release:** `/health` returns `1.2.1`; UI shows `Prototype v1.4.0`; F3–D1 remains provisional. The pitch and original narrated video describe the v1.2 line, and have not been re-recorded for this patch. Human narration is preferable if submitting.
+- **Release:** `/health` returns `1.2.1`; UI shows `Prototype v1.5.0`; F3–D1 remains provisional. The pitch and original narrated video describe the v1.2 line, and have not been re-recorded for this patch. Human narration is preferable if submitting.
 
 **Publication:** Complete source, web UI, tests, reports and submission media are published at the repository root. The GitHub repository is the code source of truth; the Unstop portal submission is separate and is not verified here.
 
 
-## Reproducible adversarial evaluation — v1.4.0
+## Reproducible adversarial evaluation — v1.5.0
 
 Historical **pre-fix v1.2.1** 42-case data is frozen as `reports/adversarial_baseline_v121_{metrics.json,cases.csv}`. Re-run the same unmodified corpus with:
 
@@ -216,3 +216,14 @@ python scripts/evaluate_openai_live.py --max-cases 10
 **Do not mix cohorts.** The historical v1.2.1 baseline detected 14/24 attacks (58.3% recall), the feedback-informed v1.4 retest of the earlier 60-case challenge detected 30/30, while the new 40-case challenge detected only 7/20 (35% recall) and flagged 1/20 benign examples. All three are manually authored, limited-scope sets; the last is a new diagnostic, not independent certification. The original 80-case synthetic template holdout detects 45/45 attacks and is not evidence of open-world robustness. Published case-level results document misses rather than hiding them.
 
 **Live OpenAI status:** `OPENAI_API_KEY` is absent from this release and real hosted responses have NOT been verified. `tests/test_v14_hosted_failures.py` tests mock 401/429/503, bad JSON/category schema, spurious model flags and offline fallback. Add a key only to a private environment; consult `scripts/evaluate_openai_live.py`. The API and mock tools are not suitable for real finance production workloads.
+
+
+## v1.5 — Bring Your Own OpenAI key (BYOK) Settings
+
+The Settings tab provides **Offline hybrid** (default, no key required) and **OpenAI assisted** (optional). Every visitor can enter their own private key and the model name, test connectivity, then use it for scans or the protected compare run. A key stays **in JavaScript memory only for that browser tab**. It is sent to the same-origin FastAPI backend via `X-OpenAI-API-Key` only for explicit classification/connection requests, forwarded to `https://api.openai.com/v1/chat/completions`, and never stored or returned. Refreshing/closing clears it. The existing offline benchmark stays offline. A hosted failure falls back to local rules/ML and labels the response `heuristic_fallback_llm_unavailable` (no claim of AI validation).
+
+**To test:** start the app from root, open `http://127.0.0.1:8000`, navigate to **Settings**, choose OpenAI assisted, type a *new* key (never commit/chat-share it), choose the model and click **Test connection**. Click **Use key in this tab**, then inspect an attack scenario without Force offline fallback. Confirm the Classifier Mode label is `heuristic_local_ml_plus_llm`. Select Offline to stop sending content to OpenAI. Existing `OPENAI_API_KEY` env is supported for developer CLI scripts; web requests intentionally do not inherit a server-wide key.
+
+**Privacy limitation:** A public hosted demo needs HTTPS, authentication, appropriate rate limiting, tenant isolation, secure production logging, and browser security hardening before accepting real customer API keys. This prototype does not persist keys, but it cannot defend a user from an untrusted host or compromised browser. Use synthetic content only. Key testing may incur OpenAI usage charges. Previously exposed keys should be revoked immediately.
+
+**Testing disclosure:** Automated mocked provider success, rejection, timeout, and fallback tests verify behavior without using a real credential. A real OpenAI call is validated only if the user successfully tests their replacement key in Settings; health status alone is not evidence of API access.
