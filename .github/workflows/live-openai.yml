@@ -1,0 +1,38 @@
+name: Optional live OpenAI classifier evaluation
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Require privately configured API key
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          if [ -z "$OPENAI_API_KEY" ]; then
+            echo "NO HOSTED TEST: configure OPENAI_API_KEY under repo Settings > Secrets and variables > Actions."
+            exit 1
+          fi
+      - name: Install dependencies
+        run: python -m pip install -r requirements.txt
+      - name: Evaluate limited synthetic attack/benign cases through OpenAI
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: gpt-4o-mini
+        run: python scripts/evaluate_openai_live.py --max-cases 10
+      - name: Upload case-level outcomes and aggregates
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: openai-live-evaluation
+          path: |
+            reports/openai_live_cases.csv
+            reports/openai_live_aggregate.json
+          if-no-files-found: ignore
