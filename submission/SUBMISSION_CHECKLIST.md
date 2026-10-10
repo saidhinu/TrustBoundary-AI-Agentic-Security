@@ -1,4 +1,4 @@
-# TrustBoundary submission checklist — v1.4.0
+# TrustBoundary submission checklist — v1.5.0
 
 - [x] Public GitHub source at repository root; verify every v1.4 file and artifact after publication.
 - [x] Working local prototype with synthetic fintech workflow and deterministic tool authorization.
@@ -22,3 +22,8 @@
 **Current v1.4 metrics:** 112 local automated tests; historical 42-case 58.3% recall; feedback-informed prior 60-case retest 100%; newly authored 40-case challenge 35% recall (7/20), 1/20 benign false positive. Do not confuse older 63/70/82/100 suites with v1.4.
 
 **Publish status:** GitHub repository and three primary submission assets verified against local Git hashes; GitHub Actions CI successful. Real OpenAI validation and signed-out browser checks remain unverified.
+
+- [x] v1.5: Settings mode selector and per-visitor personal key (memory-only), connection test and clear-key controls committed to GitHub.
+- [x] Offline default and API fallback; synthetic/mocked connection and per-visitor isolation tests included in 124-test suite.
+- [ ] Live OpenAI call: requires a newly rotated secret entered privately in Settings; the previously exposed key must not be reused.
+- [ ] v1.5 UI demo recording / pitch screenshot refresh, if presentation is to feature BYOK; existing assets remain v1.4 demonstrations.
