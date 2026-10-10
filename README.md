@@ -111,7 +111,7 @@ Reports produced under `reports/`: `metrics.json`, `evaluation.csv`, `false_posi
 
 Official problem document: 9 prompt-injection categories. F1 requires 2 detected, F2 requires 5, F3 requires 7; D1 is acceptable on textual/structured input, D2 requires high demonstrable reliability on similar inputs, D3 heterogeneous multimodal input with high reliability.
 
-The prototype **implements heuristic patterns for all 9 categories**, supplemented by a small locally trained binary ML model, with unit tests and a synthetic benchmark. **Target F3–D2 is a proposed maturity position, not an independently certified claim.** Current controlled tests alone do not establish reliable generalization; D3 is not claimed. Do not overstate this in the final submission.
+The prototype **implements heuristic patterns for all 9 categories**, supplemented by a small locally trained binary ML model, with unit tests and a synthetic benchmark. **F3–D1 is the provisional self-declared grid position based on synthetic category demonstrations. High D2 reliability is not established.** Current controlled tests alone do not establish reliable generalization; D3 is not claimed. Do not overstate this in the final submission.
 
 ## Responsible implementation
 
@@ -140,3 +140,25 @@ Current official deadline: **11 October 2026, 11:59 PM IST**. Submit a public Gi
 ### Development-only tools
 
 To reproduce screenshots, slide deck and narrated capture, install `requirements-dev.txt` as well as the system binaries Chromium, FFmpeg, LibreOffice and eSpeak; the web application itself needs none of these.
+
+## Reviewer-feedback revision (October 9, 2026)
+
+**Maintainer:** Dhinesh Babu Venkatesan · [GitHub repository](https://github.com/saidhinu/TrustBoundary-AI-Agentic-Security).
+
+See [docs/REVIEW_FIXES.md](docs/REVIEW_FIXES.md) for changes and verified tests. The defensible scope is **F3–D1**, not claimed D2 or D3. The workflow now parses the *authorized user task* separately, respects settlement IDs and no-ticket requests, derives task completion from performed operations, and withholds detected malicious external content. A limited `POST /scan/sequence` endpoint demonstrates a role-escalation / tool-action sequence; this is not broad multi-turn protection. Reported benchmark results remain synthetic and overfit to narrow templates; hosted LLM validation remains untested.
+
+```bash
+python -m pytest -q
+python -m uvicorn trustboundary.api:app --port 8000
+```
+
+**Narrated MP4 disclosure:** The original v0.9 recording was superseded by an updated v1.2 demonstration recorded from real browser interactions with the revised local app. Speech is synthetic; user narration is preferable for submission.
+
+
+## Reviewer feedback follow-up — v1.2 (October 9, 2026)
+
+- Fixed the modified quotation bypass. **Only educational quoted spans** are exempted from detection; instructions outside quotes remain inspectable.
+- Added explicit patterns for expired-directive and transfer-entire-balance paraphrases. These patterns do NOT establish open-ended semantic generalization.
+- SANITIZE now conservatively filters suspicious sentences while keeping safe standalone ones as data; QUARANTINE still withholds the entire untrusted source. Downstream agent output includes a safe data-only excerpt when available, never authorizes tool actions from the source.
+- API health, UI, and documentation use **v1.2 / F3–D1**, with D2 reserved for stronger external evaluation.
+- The intentionally vulnerable comparison remains a SCRIPTED synthetic baseline, not a real attacked LLM. The revised video reflects v1.2 but uses synthetic narration.
