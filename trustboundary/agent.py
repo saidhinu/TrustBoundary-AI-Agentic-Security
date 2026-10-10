@@ -31,11 +31,11 @@ def task_plan(task):
  valid=len(refs)==1 and (read or ticket) and not unsafe
  return {'settlement_id':refs[0].upper() if len(refs)==1 else None,'tools':(['read_settlement'] if read or ticket else [])+(['create_ticket'] if ticket else []),'supported':valid,'reason':'supported' if valid else 'unsupported or missing reference'}
 
-def run(content,source_type='email',role='merchant_support',protected=True,task=None,force_fallback=False):
+def run(content,source_type='email',role='merchant_support',protected=True,task=None,force_fallback=False,llm_api_key=None,llm_model=None):
  task=task or 'Summarize settlement ST-2048 and create a draft support ticket; do not initiate a refund.'
  run_id=traces.new_run(); mode='protected' if protected else 'insecure_scripted_baseline'
  traces.write(run_id,'INGESTED',{'mode':mode,'source_type':source_type,'role':role})
- decision=Detector().scan(content,source_type,force_fallback=force_fallback) if protected else None
+ decision=Detector(enable_llm=bool(llm_api_key),api_key=llm_api_key or '',model=llm_model).scan(content,source_type,force_fallback=force_fallback) if protected else None
  if decision:
   traces.write(run_id,'CLASSIFIED',{'categories':decision.categories,'model':decision.model,'source_sha256':decision.source_sha256,'risk':decision.severity})
   traces.write(run_id,'POLICY_DECIDED',{'disposition':decision.disposition})
@@ -93,8 +93,8 @@ def run(content,source_type='email',role='merchant_support',protected=True,task=
     'answer':answer,'inspection':decision.to_dict() if decision else None,'tool_actions':executed,
     'denied_actions':denied,'incident':incident,'content_handling':{'forwarded_content':decision.forwarded_content,'sanitized_content':decision.sanitized_content,'disposition':decision.disposition} if decision else None,'events':traces.read(run_id)}
 
-def compare(content,source_type='email',role='merchant_support',force_fallback=False,task=None):
+def compare(content,source_type='email',role='merchant_support',force_fallback=False,task=None,llm_api_key=None,llm_model=None):
  baseline=run(content,source_type,role,protected=False,task=task)
- protected=run(content,source_type,role,protected=True,task=task,force_fallback=force_fallback)
+ protected=run(content,source_type,role,protected=True,task=task,force_fallback=force_fallback,llm_api_key=llm_api_key,llm_model=llm_model)
  return {'baseline':baseline,'protected':protected,
   'comparison_note':'Baseline is an intentionally vulnerable SCRIPTED sandbox reference, not an independently evaluated LLM baseline. No real transactions or emails occur.'}
