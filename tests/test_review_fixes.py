@@ -89,6 +89,6 @@ def test_quarantined_content_never_reaches_business_answer():
 
 def test_live_api_version_matches_visible_release():
  health=TestClient(app).get('/health').json()
- assert health['version']=='1.2.1'
+ assert health['version']=='1.4.0'
  html=TestClient(app).get('/').text
- assert 'Prototype v1.2' in html and 'F3–D1 Evidence' in html and 'F3–D2 Evidence' not in html
+ assert 'Prototype v1.4.0' in html and 'F3–D1 Evidence' in html and 'F3–D2 Evidence' not in html

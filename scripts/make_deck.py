@@ -9,6 +9,10 @@ import json
 ROOT=Path(__file__).resolve().parent.parent
 OUT=ROOT/'submission'/'TrustBoundary_Hackathon_Pitch.pptx'
 M=json.loads((ROOT/'reports'/'metrics.json').read_text())
+OLD=json.loads((ROOT/'reports'/'adversarial_baseline_v121_metrics.json').read_text())
+NEW=json.loads((ROOT/'reports'/'adversarial_retest_v13_metrics.json').read_text())
+UNSEEN=json.loads((ROOT/'reports'/'unseen_20261010_v13_metrics.json').read_text())
+CHALLENGE=json.loads((ROOT/'reports'/'new_challenge_v14_initial_metrics.json').read_text())
 r=Presentation();r.slide_width=Inches(13.333);r.slide_height=Inches(7.5)
 BG='081322';PANEL='112238';PANEL2='162c43';TEAL='39D9B0';WHITE='EEF7FF';MUTED='9BB0C8';RED='FF8189';GOLD='F1C174';BLUE='85A9FF'
 
@@ -37,7 +41,7 @@ def bg(sl,n,kicker,title,subtitle=''):
  if subtitle:text(sl,subtitle,.59,1.78,11.9,.58,13,MUTED)
  rect(sl,.55,7.16,12.2,.008,'304259')
  text(sl,'ET × ACCENTURE AI HACKATHON 2026 · AGENTIC EDITION',.61,7.2,8,.2,8,MUTED)
- text(sl,'v1.2 · F3–D1 · SYNTHETIC SANDBOX',9.2,7.2,3.5,.2,8,MUTED,align=PP_ALIGN.RIGHT)
+ text(sl,'v1.4 · F3–D1 · SYNTHETIC SANDBOX',9.2,7.2,3.5,.2,8,MUTED,align=PP_ALIGN.RIGHT)
 
 def new(n,k,t,s=''):
  sl=r.slides.add_slide(r.slide_layouts[6]);bg(sl,n,k,t,s);return sl
@@ -63,6 +67,7 @@ def screenshot(sl,path,x,y,w,h):
 sl=new(1,'mission','Enterprise agents can act. Can they be trusted?','Prompt Injection Firewall · Problem Statement #2')
 rect(sl,.7,2.5,11.9,3.5,PANEL,True)
 text(sl,'TRUSTBOUNDARY',1.05,2.8,10,.84,46,WHITE,True)
+text(sl,'Participant: Dhinesh Babu Venkatesan',1.08,5.44,10,.38,15,MUTED)
 text(sl,'AI',10.75,2.8,1.0,.83,46,TEAL,True)
 text(sl,'THE AGENTIC SECURITY CONTROL PLANE',1.08,3.95,10,.46,19,TEAL,True)
 text(sl,'Detect hostile instructions · Contain unauthorized tool actions · Measure true task utility',1.08,4.65,10.6,.73,17,MUTED)
@@ -111,13 +116,19 @@ for idx,name in enumerate(names):
  text(sl,name,x+.70,y+.24,2.87,.5,14,WHITE,True)
 text(sl,'Evidence: labeled fixtures · regression tests · per-category synthetic holdout · redacted spans',.87,6.26,11.9,.35,15,MUTED)
 
-# 7 measured benchmark
-sl=new(7,'measured evidence','Synthetic holdout: reproducible, not production validation.','Local hybrid detector measured against 80 synthetic held-out examples, with transparent caveats.')
-nums=[('ATTACKS',str(M['attack_cases']),'test examples'),('BENIGN / QUOTED',str(M['benign_and_ambiguous_cases']),'test examples'),('DETECTION RECALL',f"{M['recall']:.0%}",'templated examples'),('FALSE POSITIVES',str(M['fp']),'held-out cases')]
-for i,(k,v,d) in enumerate(nums):card(sl,.75+i*3.14,2.37,2.86,1.99,k,v,d,TEAL if i in [0,2] else BLUE)
-rect(sl,.75,4.75,11.85,1.52,PANEL2,True)
-text(sl,f"Forbidden protected executions: {M['unauthorized_protected_tool_executions']}   •   Scripted control ASR: {M['scripted_baseline_attack_success_rate']:.1%}   •   Protected ASR: {M['protected_attack_success_rate']:.1%}",.97,5.06,11.3,.42,17,WHITE,True)
-text(sl,'Important: The control is intentionally vulnerable scripted logic, NOT a measured real LLM. Dataset is templated; a perfect score does not prove security.',.99,5.65,11.12,.47,11,GOLD)
+# 7 measured benchmark — show ALL scores; no false generalization claims
+sl=new(7,'measured evidence','Safety evaluation: results depend on the test distribution.','A known-case retest is not independent evidence; the fresh 40-case result remains weak.')
+for i,(label,recall,detail,desc,color) in enumerate([
+  ('PRE-FIX BASELINE',f"{OLD['recall']:.1%}",'14 / 24 attacks detected','42 known cases; 1 benign FP',RED),
+  ('FEEDBACK RETEST',f"{json.loads((ROOT/'reports'/'frozen_v13_challenge_retest_v14_metrics.json').read_text())['recall']:.1%}",'30 / 30 attacks detected','60 known cases, tuned to feedback',TEAL),
+  ('NEW CHALLENGE',f"{CHALLENGE['recall']:.1%}",'7 / 20 attacks detected','40 new authored cases; 1 benign FP',GOLD)]):
+ x=.75+i*4.25;rect(sl,x,2.60,3.95,2.92,PANEL,True)
+ text(sl,label,x+.2,2.89,3.58,.34,13,MUTED,True)
+ text(sl,recall,x+.2,3.41,3.56,.70,37,color,True)
+ text(sl,detail,x+.2,4.22,3.56,.34,15,WHITE,True)
+ text(sl,desc,x+.2,4.70,3.5,.55,12,MUTED)
+rect(sl,.77,5.79,11.98,.76,PANEL2,True)
+text(sl,'F3–D1 only. Template benchmark 45/45; newly frozen challenge misses 13/20 attacks. Zero forbidden mock tool actions.',.94,5.98,11.56,.47,13,GOLD,True)
 
 # 8 EGO screen
 sl=new(8,'quality engineering','EGO measures safety AND usefulness.','Security that breaks every legitimate workflow is not a viable enterprise product.')
@@ -137,9 +148,10 @@ for x,h,b,d in [(.8,'CONTROL PLANE','Platform governance','Central AI policy and
 text(sl,'Financial-impact dashboard uses editable hypothetical assumptions; no real customer savings claimed.',.87,6.12,11.6,.48,16,GOLD)
 
 # 10 roadmap and judge ask
-sl=new(10,'submission','Ready to demonstrate. Honest about the next steps.','Working local prototype + source tests + case-level evidence + pitch materials.')
-for idx,(label,desc) in enumerate([('TODAY','Run the protected fintech workflow, evaluate, inspect traces.'),('NEXT','External adversarial corpus, LLM red-team runs, real identity/approval integration.'),('FOR PRODUCTION','Multitenant auth, audit hardening, SIEM, OCR, rate limits, independent security review.')]):
+sl=new(10,'submission','Runnable, measurable, and clear about limitations.','Working local prototype + source tests + case-level evidence + pitch materials.')
+for idx,(label,desc) in enumerate([('TODAY','Run the protected fintech workflow, evaluate, inspect traces.'),('NEXT','Independent testing and live OpenAI evaluation; fresh 40-case recall only 35.0%.'),('FOR PRODUCTION','Multitenant auth, audit hardening, SIEM, OCR, rate limits, independent security review.')]):
  y=2.42+idx*1.22;rect(sl,.89,y,11.45,.99,PANEL,True);text(sl,label,1.16,y+.25,2.6,.34,14,TEAL,True);text(sl,desc,3.57,y+.23,8.35,.54,14,WHITE)
+text(sl,'Repository: github.com/saidhinu/TrustBoundary-AI-Agentic-Security',.86,6.09,11.85,.38,15,MUTED,True)
 text(sl,'TrustBoundary: provenance before permission.',1.1,6.37,10,.45,22,TEAL,True)
 r.save(OUT)
 print(OUT)
