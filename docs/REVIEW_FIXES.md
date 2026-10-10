@@ -1,3 +1,7 @@
+# Historical v1.2.1 reviewer observations (superseded by v1.4)
+
+**Historical-only document.** References to 63, 70 or 82 tests describe earlier releases, not the current build. See `docs/adversarial_review.md` and `submission/SUBMISSION_STATUS.md` for the v1.4 112-test, 40-case evaluation and published artifacts. Historical instructions requesting video replacement or source publication are no longer current.
+
 # October 9 Reviewer Feedback — Verified Revision
 
 **Participant:** Dhinesh Babu Venkatesan  
