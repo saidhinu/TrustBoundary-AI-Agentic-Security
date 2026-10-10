@@ -1,8 +1,14 @@
 """Provenance-aware, explainable detector. Optional hosted LLM is advisory only."""
-import base64, hashlib, html, json, os, re, time
+import base64, codecs, hashlib, html, json, os, re, time, unicodedata
+from urllib.parse import unquote
 from dataclasses import dataclass, asdict
 from .fixtures import CATEGORIES
 
+RULE_PREFIXES={
+ 'Instruction Override':'PI-OVR', 'Role Change':'PI-ROLE', 'Secret Extraction':'PI-SEC',
+ 'Tool Abuse':'PI-TOOL', 'Credential Theft':'PI-CRED', 'Context Poisoning':'PI-CTX',
+ 'Multi-Step Jailbreaks':'PI-MULTI', 'Encoded Instructions':'PI-ENC', 'Indirect Prompt Injection':'PI-IND',
+}
 PATTERNS={
  'Instruction Override':[r'ignore (?:all |the |any )?(?:previous|prior|above) (?:instructions|rules|policies)',r'ignore (?:previous|prior) polic(?:y|ies)',r'forget (?:the )?(?:system|policy)',r'disregard (?:every |the |all )?(?:prior|user)',r'override (?:the )?instructions',r'(?:replace|discard|bypass|set aside) (?:the )?(?:existing|current|developer|system|safety|user) (?:rules|instructions|policy|guardrails)',r'(?:earlier|previous|prior) (?:directives|policies|rules|instructions) (?:have |has )?(?:expired|ended|been revoked)',r'you now (?:answer|report|listen) to (?:this|the) (?:email|sender|message) alone'],
  'Role Change':[r'\[system\]',r'<system>',r'system message:.*role',r'pretend you are (?:an? )?(?:authorized|finance_admin)',r'developer override',r'role\s*=\s*admin'],
@@ -90,6 +96,55 @@ def intent_categories(text, source_type='email'):
             findings[category]=0.83
     return findings
 
+# Normalization is bounded and ONLY used for inspection; source bytes are retained
+# for hashing and the browser continues to display the original input.
+_ZERO_WIDTH = dict.fromkeys(map(ord, "\u200b\u200c\u200d\u2060\ufeff\u00ad"), None)
+_CONFUSABLE = str.maketrans({
+    **dict(zip("аеорсхуіѕјкмтну", "aeopcxyisjkmthy")),  # common Cyrillic lookalikes
+    **dict(zip("ΑΒΕΖΗΙΚΜΝΟΡΤΥΧ", "ABEZHIKMNOPTYX")),
+    **dict(zip("αβεικνορτυχ", "abeiknoprtyx")),
+})
+_SPACED_WORDS = ('ignore','system','developer','refund','password','override','secret','transfer','instructions','prompt','admin','credentials')
+_SPACED_RE = re.compile(r'(?<!\w)(?:[A-Za-z][\s._-]){4,}[A-Za-z](?!\w)')
+
+def fold(text: str) -> str:
+    """Canonicalize common prompt-injection obfuscation without blanket word merging.
+
+    NFKC handles fullwidth characters; homoglyph mapping and zero-width removal
+    handle a bounded list. Only known signal words are joined when spaced out.
+    """
+    result = unicodedata.normalize('NFKC', text).translate(_ZERO_WIDTH).translate(_CONFUSABLE)
+    def join(m):
+        word = re.sub(r'[\s._-]', '', m.group(0))
+        return word if word.lower() in _SPACED_WORDS else m.group(0)
+    return _SPACED_RE.sub(join, result)
+
+SIGNAL_PATTERNS = {
+    'override': re.compile(r'\b(?:disregard|ignore|set\s+aside|no\s+longer\s+applies|from\s+now\s+on|earlier|previous\s+(?:guidance|rules|instructions)|new\s+(?:orders|directions))\b', re.I),
+    'authority': re.compile(r'\b(?:admin|system|developer|override|authori[sz]ed|higher\s+authority|highest\s+authority|supersedes?)\b', re.I),
+    'sensitive': re.compile(r'\b(?:token|password|credential|api\s+key|database|customer\s+data|system\s+prompt|secret|account\s+balance)\b', re.I),
+    'exfil': re.compile(r'\b(?:forward|send|export|email|post|upload|transmit|ship|leak)\b.{0,80}(?:@\S+|https?://\S+|outside\s+account|sender)', re.I|re.S),
+    'address': re.compile(r'\b(?:you|assistant|bot|AI\s+agent)\b', re.I),
+    'action': re.compile(r'\b(?:transfer|pay|refund|wire|release|execute|perform|move|disburse|send)\b', re.I),
+}
+SIGNAL_WEIGHTS = {'override': 2, 'authority': 2, 'sensitive': 2, 'exfil': 3, 'address': 1, 'action': 1}
+SIGNAL_THRESHOLD = 5
+REPORTING_CUE = re.compile(r'\b(?:attackers?\s+(?:often\s+)?(?:write|say|use)|write|say|said|says|such\s+as|e\.g\.|for\s+example|phrase|string|quoting|quoted|example|training\s+note|security\s+(?:article|awareness)|blog|documentation|tutorial|illustrat(?:e|ion)|describ(?:e|ing))\b',re.I)
+
+def signal_findings(text):
+    hits={name for name,pat in SIGNAL_PATTERNS.items() if pat.search(text)}
+    score=sum(SIGNAL_WEIGHTS[k] for k in hits)
+    # Require a meaningful suspicious conjunction, not mere technical terms.
+    triggered=(score>=SIGNAL_THRESHOLD and
+       (('override' in hits or 'authority' in hits) and ('address' in hits or 'action' in hits or 'exfil' in hits)
+       or ('exfil' in hits and 'sensitive' in hits)))
+    if triggered:
+        category=('Credential Theft' if 'exfil' in hits and 'sensitive' in hits
+                  else 'Tool Abuse' if 'action' in hits and 'sensitive' in hits and 'override' in hits
+                  else 'Instruction Override')
+        return {category:0.81},{'score':score,'hits':sorted(hits)}
+    return {},{'score':score,'hits':sorted(hits)}
+
 TRAINING_QUOTE=re.compile(r'^(?:training note:|security awareness article quoting|the article quoted|please explain why a request to|we found an attempted attack with text|a policy explicitly says never execute)',re.I)
 # Quote exemptions apply to the quoted span ONLY. A training preface does not
 # grant trust to instructions outside that span (CVE-like regression #TB-QUOTE-2).
@@ -115,21 +170,23 @@ QUOTE_EXECUTION_REVERSE=re.compile(
 def actively_references_quoted_instruction(text):
     """True when instructions *outside* quotes direct execution of a quote."""
     outside=QUOTED_SPANS.sub(lambda m:' '*len(m.group(0)),text)
-    return bool(QUOTE_EXECUTION_DIRECTIVE.search(outside)
+    return bool(re.search(r'\b(?:follow|execute|obey|carry\s+out|perform|apply|run)\s+(?:(?:the|this|that|any)\s+)?(?:quoted\s+)?(?:example|instruction|command|text|phrase|string)(?:\s+(?:below|above|now|exactly))?\b', outside, re.I)
+        or QUOTE_EXECUTION_DIRECTIVE.search(outside)
         or QUOTE_EXECUTION_REVERSE.search(outside)
         or re.search(r'\b(?:now|then|immediately)\s+(?:do|execute|follow|perform|carry\s+out)\s+(?:exactly\s+)?(?:what|as)\s+(?:the\s+)?(?:example|quote|quoted|instruction)\s+(?:says|states|directs|instructs)?',outside,re.I)
         or re.search(r'\bact\s+on\s+(?:that|the)\s+(?:exact\s+)?(?:example|quote|instruction)\b',outside,re.I)
         or re.search(r'\b(?:do|execute|follow|perform|carry\s+out)\s+(?:exactly\s+)?(?:what|as)\s+(?:the\s+)?(?:example|quote)\s+(?:says|states|directs)',outside,re.I))
 
 def inspectable_text(text):
-    """Neutralize an explicitly educational quote while preserving outside text.
-
-    Returns text with quoted spans replaced by spaces so pattern offsets are
-    preserved. This exemption is never applied to active text outside quotes.
-    """
-    if not TRAINING_QUOTE.search(text) or actively_references_quoted_instruction(text):
+    """Mask only reported/educational quoted spans, never surrounding instructions."""
+    if actively_references_quoted_instruction(text):
         return text
-    return QUOTED_SPANS.sub(lambda m: ' '*len(m.group(0)), text)
+    def replace_quote(match):
+        preceding = text[max(0,match.start()-115):match.start()]
+        # A reporting cue must appear locally before this quote; no broad
+        # prefix exemption is applied to unrelated later instructions.
+        return ' '*len(match.group()) if REPORTING_CUE.search(preceding) else match.group()
+    return QUOTED_SPANS.sub(replace_quote,text)
 
 def split_for_sanitization(text):
     """Split into low-risk candidate spans, preserving punctuation where possible."""
@@ -201,17 +258,39 @@ def normalize(text, source_type='email'):
             obj=json.loads(text)
             text=json.dumps(obj,ensure_ascii=False)
         except (ValueError,TypeError): pass
-    text=html.unescape(text)
+    text=fold(html.unescape(fold(text)))
     return re.sub(r'\s+',' ',text).strip()
 
 def variants(text):
-    candidates=[text]
-    for token in re.findall(r'(?<![A-Za-z0-9+/])[A-Za-z0-9+/]{16,}={0,2}(?![A-Za-z0-9+/])',text)[:12]:
-        try:
-            decoded=base64.b64decode(token+'='*((-len(token))%4), validate=True).decode('utf-8')
-            if all(ch.isprintable() for ch in decoded): candidates.append(decoded)
-        except (ValueError,UnicodeDecodeError): pass
-    return candidates
+    """Decode short candidate payloads up to depth 2 (never execute content)."""
+    seen=set();queue=[(text,0)];result=[]
+    while queue and len(result)<32:
+        current,depth=queue.pop(0)
+        current=fold(current)
+        if current in seen or len(current)>100000:continue
+        seen.add(current);result.append(current)
+        if depth>=2:continue
+        candidates=[]
+        unquoted=unquote(current)
+        if unquoted!=current:candidates.append(unquoted)
+        tokens=re.findall(r'(?<![A-Za-z0-9+/])[A-Za-z0-9+/]{16,}={0,2}(?![A-Za-z0-9+/])',current)[:12]
+        for token in tokens:
+            try:
+                dec=base64.b64decode(token+'='*((-len(token))%4),validate=True).decode('utf-8')
+                if 5<=len(dec)<=12000 and dec.isprintable():candidates.append(dec)
+            except (ValueError,UnicodeDecodeError):pass
+        for token in re.findall(r'(?<![a-fA-F0-9])[a-fA-F0-9]{20,}(?![a-fA-F0-9])',current)[:8]:
+            try:
+                dec=bytes.fromhex(token).decode('utf-8')
+                if dec.isprintable():candidates.append(dec)
+            except (ValueError,UnicodeDecodeError):pass
+        if re.search(r'(?i)\brot13\b|\bvtaber\b|\bvffhr_ershaq\b',current):
+            # Only decode marked ROT13 examples; applying ROT13 to every English
+            # sentence creates a large false-positive surface.
+            candidates.append(codecs.decode(current,'rot_13'))
+        for item in candidates[:16]:
+            if item not in seen:queue.append((item,depth+1))
+    return result
 
 @dataclass
 class Decision:
@@ -249,12 +328,13 @@ class Detector:
         match_evidence=[]
         for candidate in variants(inspected):
             for cat, patterns in PATTERNS.items():
-                for pat in patterns:
+                for rule_index,pat in enumerate(patterns, start=1):
                     match=re.search(pat,candidate,re.I|re.S)
                     if match:
                         findings[cat]=max(findings.get(cat,0),.96 if cat in ('Role Change','Tool Abuse') else .9)
                         if len(match_evidence)<8:
-                            match_evidence.append({'category':cat,'excerpt':safe_excerpt(match.group(0))})
+                            match_evidence.append({'category':cat,'rule_id':f'{RULE_PREFIXES[cat]}-{rule_index:03d}',
+                                'excerpt':safe_excerpt(match.group(0))})
                         break
         for candidate in variants(inspected):
             for cat in contextual_matches(candidate):
@@ -270,6 +350,10 @@ class Detector:
             findings={k:v for k,v in findings.items() if k not in ('Tool Abuse','Credential Theft')}
             match_evidence=[e for e in match_evidence if e['category'] not in ('Tool Abuse','Credential Theft')]
         for candidate in variants(inspected):
+            signals,detail=signal_findings(candidate)
+            for category,score in signals.items():
+                findings[category]=max(findings.get(category,0),score)
+                if len(match_evidence)<8:match_evidence.append({'category':category,'excerpt':'Signal groups: '+', '.join(detail['hits'])})
             for category,score in intent_categories(candidate,source_type).items():
                 findings[category]=max(findings.get(category,0),score)
                 if len(match_evidence)<8:
@@ -284,7 +368,7 @@ class Detector:
                 ai_meta='heuristic_plus_local_ml'
                 # For an unfamiliar malicious-looking text with no taxonomy hit,
                 # quarantine conservatively; no category is invented.
-                if ml_risk>=0.87 and inspected.strip() and not findings and not (TRAINING_QUOTE.match(norm) and not actively_references_quoted_instruction(norm)):
+                if ml_risk>=0.87 and inspected.strip() and not findings and not (inspectable_text(norm)!=norm and not actively_references_quoted_instruction(norm)):
                     findings['Uncategorized suspicious instruction']=ml_risk
             except Exception:
                 ai_meta='heuristic_fallback_ml_unavailable'

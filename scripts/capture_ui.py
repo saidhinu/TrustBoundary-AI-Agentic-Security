@@ -43,5 +43,7 @@ with sync_playwright() as p:
  page.screenshot(path=str(out/'05_impact.png'),full_page=True)
  page.locator('[data-page="architecture"]').click();page.wait_for_timeout(200)
  page.screenshot(path=str(out/'06_architecture.png'),full_page=True)
+ page.locator('[data-page="settings"]').click();page.wait_for_timeout(300)
+ page.screenshot(path=str(out/'07_settings.png'),full_page=True)
  browser.close()
 print('Captured',len(list(out.glob('0*.png'))),'screenshots of actual app/frontend and TestClient data')

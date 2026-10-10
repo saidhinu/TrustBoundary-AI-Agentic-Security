@@ -1,10 +1,14 @@
+# local secrets, environments and test artifacts
+.env
+.env.*
+!.env.example
+.venv/
 __pycache__/
 .pytest_cache/
-.venv/
-.env
 *.pyc
-*.sqlite3
 *.db
+*.sqlite3
 .DS_Store
-reports/openai_live_aggregate.json
-reports/openai_live_cases.csv
+data/*.parquet
+reports/verify_*
+reports/ci_*

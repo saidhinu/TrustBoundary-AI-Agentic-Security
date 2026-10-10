@@ -1,0 +1,52 @@
+{
+  "source": "Synthetic development fixture families only",
+  "n": 240,
+  "groups": 42,
+  "method": "GroupKFold(5), TF-IDF char 3-5 + logistic regression, 0.5 threshold",
+  "TP": 135,
+  "TN": 105,
+  "FP": 0,
+  "FN": 0,
+  "recall": 1.0,
+  "fpr": 0.0,
+  "precision": 1.0,
+  "folds": [
+    {
+      "fold": 1,
+      "rows": 48,
+      "template_families": 8,
+      "TN": 18,
+      "TP": 30
+    },
+    {
+      "fold": 2,
+      "rows": 48,
+      "template_families": 8,
+      "TP": 30,
+      "TN": 18
+    },
+    {
+      "fold": 3,
+      "rows": 49,
+      "template_families": 9,
+      "TN": 24,
+      "TP": 25
+    },
+    {
+      "fold": 4,
+      "rows": 49,
+      "template_families": 9,
+      "TP": 25,
+      "TN": 24
+    },
+    {
+      "fold": 5,
+      "rows": 46,
+      "template_families": 8,
+      "TN": 21,
+      "TP": 25
+    }
+  ],
+  "date_utc": "2026-10-10T12:32:52.946759+00:00",
+  "limitation": "Not an external, independently authored corpus. Does not evaluate the full rules + ML pipeline."
+}

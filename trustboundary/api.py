@@ -1,5 +1,6 @@
 """FastAPI for TrustBoundary demonstrator. Not internet-exposed production service."""
-import io,json,os,re
+import io,json,os,re,zipfile
+import xml.etree.ElementTree as ET
 import httpx
 from pathlib import Path
 from fastapi import FastAPI, HTTPException, UploadFile, File, Request
@@ -11,9 +12,10 @@ from .agent import run,compare,inspect_incident
 from .evaluation import evaluate,REPORTS
 from .fixtures import SCENARIOS,CATEGORIES,evaluation_dataset
 from . import traces
+from . import __version__
 
 BASE=Path(__file__).resolve().parent.parent
-app=FastAPI(title='TrustBoundary AI',version='1.5.0',description='Provenance-aware agentic injection firewall; SYNTHETIC sandbox only')
+app=FastAPI(title='TrustBoundary AI',version=__version__,description='Provenance-aware agentic injection firewall; SYNTHETIC sandbox only')
 app.mount('/assets',StaticFiles(directory=str(BASE/'web')),name='assets')
 
 class ConnectionTestIn(BaseModel):
@@ -41,7 +43,7 @@ async def secure_api_headers(request:Request,call_next):
 
 class ScanIn(BaseModel):
  content: str = Field(min_length=1,max_length=100000)
- source_type: str = Field(default='email',pattern='^(email|api|html|web|markdown|pdf|text)$')
+ source_type: str = Field(default='email',pattern='^(email|api|html|web|markdown|pdf|text|docx|code)$')
  force_fallback: bool = False
 class SequenceIn(BaseModel):
  messages: list[str] = Field(min_length=1,max_length=20)
@@ -63,7 +65,7 @@ class ROIIn(BaseModel):
 @app.get('/')
 def index(): return FileResponse(BASE/'web'/'index.html')
 @app.get('/health')
-def health(): return {'status':'ok','mode':'synthetic_sandbox','llm_configured':False,'personal_key_supported':True,'local_ml_enabled':os.getenv('TB_ENABLE_LOCAL_ML','1')!='0','hosted_validation':'not_run_by_health_check','version':'1.5.0'}
+def health(): return {'status':'ok','mode':'synthetic_sandbox','llm_configured':False,'personal_key_supported':True,'local_ml_enabled':os.getenv('TB_ENABLE_LOCAL_ML','1')!='0','hosted_validation':'not_run_by_health_check','version':__version__}
 @app.get('/scenarios')
 def scenarios(): return {'scenarios':SCENARIOS,'categories':CATEGORIES}
 @app.post('/settings/test')
@@ -131,7 +133,27 @@ def impact(v:ROIIn):
  'monthly_review_cost_inr':round(review_cost),'monthly_false_positive_review_cost_inr':round(fp_cost),
  'monthly_platform_cost_inr':round(v.estimated_monthly_platform_cost),
  'modeled_monthly_net_benefit_inr':round(avoided-review_cost-fp_cost-v.estimated_monthly_platform_cost),
- 'disclaimer':'HYPOTHETICAL BUSINESS SCENARIO. Not actual BasePay/customer outcomes; assumptions are editable and do not derive from the synthetic benchmark.'}
+ 'disclaimer':'HYPOTHETICAL BUSINESS SCENARIO. Not actual customer outcomes; assumptions are editable and do not derive from the synthetic benchmark.'}
+def extract_docx_text(data: bytes) -> str:
+    """Extract document, header, footer and comment text, including hidden w:vanish runs.
+
+    OOXML text-run extraction deliberately includes hidden text rather than
+    relying on what Word renders. This does not execute macros or field code.
+    """
+    from docx import Document
+    Document(io.BytesIO(data))  # validate package structure using python-docx
+    namespace='{http://schemas.openxmlformats.org/wordprocessingml/2006/main}'
+    extracted=[]
+    with zipfile.ZipFile(io.BytesIO(data)) as archive:
+        names=[n for n in archive.namelist() if n=='word/document.xml' or
+              re.fullmatch(r'word/(?:header\d+|footer\d+|comments)\.xml',n)]
+        for name in names:
+            xml=ET.fromstring(archive.read(name))
+            # Every w:t is read, even when parent w:rPr contains w:vanish.
+            parts=[node.text or '' for node in xml.iter() if node.tag in (namespace+'t',namespace+'instrText')]
+            if parts:extracted.append(name+': '+' '.join(parts))
+    return '\n'.join(extracted)
+
 @app.post('/ingest/file')
 async def ingest_file(file:UploadFile=File(...)):
  raw=await file.read(5_000_001)
@@ -143,7 +165,17 @@ async def ingest_file(file:UploadFile=File(...)):
    r=PdfReader(io.BytesIO(raw));text='\n'.join((p.extract_text() or '') for p in r.pages[:25]); source='pdf'
    if not text.strip():return JSONResponse({'error':'Scanned or image-only PDF requires OCR; unsupported in this prototype'},status_code=422)
   except Exception as exc:raise HTTPException(422,'Could not parse the supplied PDF') from exc
+ elif filename.endswith('.docx'):
+  try:
+   text=extract_docx_text(raw);source='docx'
+   if not text.strip():raise ValueError('Empty DOCX')
+  except (ValueError,ET.ParseError,zipfile.BadZipFile,KeyError) as exc:
+   raise HTTPException(422,'Could not extract DOCX text') from exc
+ elif filename.endswith(('.py','.js')):
+  # Ingest the whole source, including Python docstrings, JS/Python comments
+  # and string literals; no code is imported or executed.
+  text=raw.decode('utf-8',errors='replace');source='code'
  elif filename.endswith(('.txt','.md','.html','.htm','.eml','.json')):
   text=raw.decode('utf-8',errors='replace');source=('html' if filename.endswith(('.html','.htm')) else 'api' if filename.endswith('.json') else 'email' if filename.endswith('.eml') else 'markdown' if filename.endswith('.md') else 'text')
- else:raise HTTPException(415,'Supported: PDF with text, TXT, MD, HTML, EML, JSON')
+ else:raise HTTPException(415,'Supported: PDF text, DOCX, PY, JS, TXT, MD, HTML, EML, JSON')
  return {'filename':filename,'source_type':source,'content':text[:100000],'characters':len(text),'truncated':len(text)>100000}

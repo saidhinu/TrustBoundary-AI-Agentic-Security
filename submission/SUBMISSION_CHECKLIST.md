@@ -1,29 +1,24 @@
-# TrustBoundary submission checklist — v1.5.0
+# TrustBoundary v1.6 — Release verification checklist
 
-- [x] Public GitHub source at repository root; verify every v1.4 file and artifact after publication.
-- [x] Working local prototype with synthetic fintech workflow and deterministic tool authorization.
-- [x] Historical 42-case corpus, original evaluator and **pre-fix** baseline CSV/metrics preserved; compare against post-fix results.
-- [x] Added a separate 60-case authored challenge set; see tests/unseen_20261010.json and distinct report.
-- [x] Proposed self-rating remains **F3–D1**. Neither synthetic suite shows production security or independently verified D2 reliability.
-- [x] PDF and PPTX pitch deck published and hash-verified to v1.4 with both adversarial and template metrics.
-- [x] 2–4 minute synthetic-narration demo published and hash-verified to v1.4; recommend participant's own recorded narration.
-- [x] Public repository contains v1.4 source, case-level corpus/reports, PPTX/PDF and reconstructed narrated MP4. Git blob SHA checks passed; GitHub video assembly workflow completed successfully.
-- [x] Fresh-checkout GitHub Actions workflow installed dependencies, passed 112 tests and reproduced historical/current case metrics: https://github.com/saidhinu/TrustBoundary-AI-Agentic-Security/actions/runs/38033073702
-- [ ] Independently verify file access in a signed-out browser (not available through the current verification interface).
-- [x] Hosted OpenAI protocol, invalid output, false-positive and timeout/401/429/503 fallback validated with local mocks.
-- [ ] Live OpenAI HTTP requests/false-positive rate remain **UNVERIFIED** without user-supplied API key; run `scripts/evaluate_openai_live.py` privately.
-- [ ] Deploy reachable hosted demo if specifically required; the prototype currently runs locally only.
-- [ ] Unstop competition portal submission and receipt are deliberately **out of scope** of this work, per participant request.
-- [ ] Confirm contest disclosure/originality/participant rules.
+- [x] Local working FastAPI/UI source and offline-first detector.
+- [x] 146 local automated tests including Unicode/encoding and Word/code ingestion tests.
+- [x] Original historical 42-case baseline retained at 58.3% recall (14/24).
+- [x] Reviewed 42-case known retest at 100% (24/24); 60-case known retest at 100% (30/30); neither is independent.
+- [x] Previously authored 40-case challenge remains at 35% (7/20); false-positive 1/20.
+- [x] 50 additional business emails measured: 2/50 false positives (4%).
+- [x] GroupKFold synthetic-family ML-only evaluation script/report; 135/135 recall, not external validation.
+- [x] DOCX, PY, JS and Unicode inspection paths added and regression tested.
+- [x] PDF/PPTX v1.6 regenerated, based on latest evidenced results.
+- [x] Local v1.6 screenshots, 10-slide deck and 2m27 screenshot walkthrough generated; GitHub verification remains pending.
+- [ ] v1.6 screenshot/video evidence and updated media checked from a signed-out browser.
+- [ ] GitHub source commit and fresh-checkout CI for v1.6 verified (previous v1.5 GitHub runs do not count).
+- [ ] Public deepset official test split evaluated: pin-and-download script exists; download unavailable in build environment.
+- [ ] Live OpenAI model run: NOT verified (requires a newly generated secret; exposed key must be revoked).
+- [ ] Full Git history scanned with a dedicated gitleaks scan; pending external runner.
+- [ ] Complete authenticated human review, originality statements and competition portal submission.
 
-**Older 55, 63, 70 and 82 test results are historical v0.9–v1.2.1 releases, not the current suite.**
-**Event deadline in original documentation: October 11, 2026 23:59 IST.**
+## Historical notes
 
-**Current v1.4 metrics:** 112 local automated tests; historical 42-case 58.3% recall; feedback-informed prior 60-case retest 100%; newly authored 40-case challenge 35% recall (7/20), 1/20 benign false positive. Do not confuse older 63/70/82/100 suites with v1.4.
+v1.2.1 had 82 tests; v1.3 had 100; v1.4 had 112; v1.5 had 124. These are historical release counts. v1.6 currently has 146 local passing tests. Keep these distinct from benchmark case counts.
 
-**Publish status:** GitHub repository and three primary submission assets verified against local Git hashes; GitHub Actions CI successful. Real OpenAI validation and signed-out browser checks remain unverified.
-
-- [x] v1.5: Settings mode selector and per-visitor personal key (memory-only), connection test and clear-key controls committed to GitHub.
-- [x] Offline default and API fallback; synthetic/mocked connection and per-visitor isolation tests included in 124-test suite.
-- [ ] Live OpenAI call: requires a newly rotated secret entered privately in Settings; the previously exposed key must not be reused.
-- [ ] v1.5 UI demo recording / pitch screenshot refresh, if presentation is to feature BYOK; existing assets remain v1.4 demonstrations.
+Deadline according to event brief: 11 October 2026, 23:59 IST. No Unstop submission has been made or confirmed in this workflow.

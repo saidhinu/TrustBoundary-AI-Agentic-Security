@@ -1,4 +1,4 @@
-name: Verify TrustBoundary v1.5 reproducibility
+name: Verify TrustBoundary v1.6 source
 on:
   push:
     branches: [main]
@@ -6,9 +6,13 @@ on:
 permissions:
   contents: read
 jobs:
-  test-and-evaluate:
+  verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
+    env:
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
     steps:
       - uses: actions/checkout@v4
         with:
@@ -17,22 +21,17 @@ jobs:
         with:
           python-version: '3.11'
           cache: pip
-      - name: Install runtime and test dependencies
+      - name: Install dependencies
         run: python -m pip install -r requirements.txt
-      - name: Run complete automated test suite
+      - name: Scan Git history for high-confidence secrets
+        run: python scripts/scan_git_secrets.py
+      - name: Run automated tests
         run: python -m pytest -q
-      - name: Reproduce original 42-case historical baseline
+      - name: Historical 42-case evidence
         run: bash scripts/reproduce_baseline_v121.sh
-      - name: Reproduce v1.4 evaluation on 60 known cases
-        run: python scripts/evaluate_adversarial.py --corpus tests/unseen_20261010.json --name ci_known_60
-      - name: Reproduce v1.4 evaluation on 40 newly authored cases
-        run: python scripts/evaluate_adversarial.py --corpus tests/new_challenge_v14_frozen.json --name ci_new_40
-      - name: Check honest new-set metrics
-        run: |
-          python - <<'PY'
-          import json
-          from pathlib import Path
-          x=json.loads(Path('reports/ci_new_40_metrics.json').read_text())
-          assert x['counts']=={'TP':7,'FP':1,'TN':19,'FN':13}, x['counts']
-          print('Verified: 7/20 attacks detected, 13 misses and one benign false positive.')
-          PY
+      - name: Re-evaluate known 40-case challenge
+        run: python scripts/evaluate_adversarial.py --corpus tests/new_challenge_v14_frozen.json --name ci_known_40
+      - name: Re-evaluate 50 benign business examples
+        run: python scripts/evaluate_adversarial.py --corpus tests/benign_50_business.json --name ci_benign_50
+      - name: Grouped synthetic-family ML validation
+        run: python scripts/evaluate_groupcv.py

@@ -1,6 +1,6 @@
-# Historical v1.2.1 reviewer observations (superseded by v1.4)
+# Historical v1.2.1 reviewer notes (superseded by v1.4)
 
-**Historical-only document.** References to 63, 70 or 82 tests describe earlier releases, not the current build. See `docs/adversarial_review.md` and `submission/SUBMISSION_STATUS.md` for the v1.4 112-test, 40-case evaluation and published artifacts. Historical instructions requesting video replacement or source publication are no longer current.
+Older 63, 70 and 82 test counts below refer to prior releases only; current v1.4 has 112 automated tests. Earlier requests to republish source or remake the video are now complete. See docs/adversarial_review.md and docs/release_verification_v14.md.
 
 # October 9 Reviewer Feedback — Verified Revision
 
@@ -51,4 +51,4 @@ Previously documented 63-pass and 70-pass totals are **historical**. Latest loca
 
 The separate 42-case, feedback-informed adversarial set reported **14/24 attacks detected, 10 missed, 1/18 benign flagged**. It was neither used for training nor blind externally supplied; a substantial generalization gap remains. Refer to `reports/adversarial_review_metrics.json` and `docs/adversarial_review.md`.
 
-Publication note: full source is now at GitHub repository root (not the original `TrustBoundary_AI 2/` wrapper). Old notes warning that GitHub source was missing describe the situation *before* upload and are superseded.
+Publication note: full source is now at GitHub repository root (not the original an earlier nested directory wrapper). Old notes warning that GitHub source was missing describe the situation *before* upload and are superseded.

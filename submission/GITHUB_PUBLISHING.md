@@ -1,6 +1,6 @@
 # GitHub publishing and reproducibility — v1.4
 
-The expected public structure is rooted at `trustboundary/`, `web/`, `tests/`, `scripts/`, `reports/`, `docs/`, and `submission/`; no nested `TrustBoundary_AI 2/` directory.
+The expected public structure is rooted at `trustboundary/`, `web/`, `tests/`, `scripts/`, `reports/`, `docs/`, and `submission/`; no nested an earlier nested directory directory.
 
 1. Verify code and reproducibility artifacts at `https://github.com/saidhinu/TrustBoundary-AI-Agentic-Security`.
 2. Run `python -m pip install -r requirements.txt` and `python -m pytest -q` from a fresh clone.

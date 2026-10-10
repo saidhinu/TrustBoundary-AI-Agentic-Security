@@ -32,7 +32,7 @@ with sync_playwright() as p:
     def caption(s):page.evaluate('(v) => document.querySelector("#tb-captions").innerText=v',s)
     def wait(s):page.wait_for_timeout(int(s*500))
     def goto(name):page.locator(f'[data-page="{name}"]').click();wait(.6)
-    caption('TRUSTBOUNDARY AI v1.4  |  F3-D1  |  Working synthetic prototype')
+    caption('TRUSTBOUNDARY AI v1.6  |  F3-D1  |  Working synthetic prototype')
     wait(9)
     caption('01  Inspect malicious merchant content from a low-trust email')
     page.select_option('#scenario','role');page.click('#scanBtn');wait(12)
@@ -59,7 +59,7 @@ with sync_playwright() as p:
     wait(10)
     goto('impact');page.click('#impactBtn');caption('11  Business impact uses an editable hypothetical financial model — no real customer results')
     wait(11)
-    goto('lab');caption('TRUSTBOUNDARY AI v1.4  |  Provenance before permission  |  Prototype only')
+    goto('lab');caption('TRUSTBOUNDARY AI v1.6  |  Provenance before permission  |  Prototype only')
     wait(7)
     video=page.video
     context.close();browser.close()

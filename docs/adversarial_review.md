@@ -1,3 +1,5 @@
+> **v1.6 update (10 October 2026):** Following Unicode/encoding normalization and contextual signal additions, the earlier v1.4 40-case challenge still detects **7/20 attacks** with **1/20 benign false positive**. A separate 50-business-email control has **2/50 false positives**. Synthetic-family grouped 5-fold CV of the ML component is 135/135 TP and 0/105 FP, but is **not an external benchmark**. The public deepset test runner is prepared but has **not been executed** in the offline build. See `reports/new_challenge_v16_retest_metrics.json`, `reports/benign_50_v16_metrics.json`, `reports/synthetic_groupkfold.json`, and `scripts/evaluate_public.py`. These additions do not establish D2 reliability.
+
 # TrustBoundary AI v1.4: Adversarial evaluation and reproducibility
 
 **Date:** 10 October 2026. **Scope:** synthetic, manually authored, feedback-informed. **Maturity:** provisional F3–D1. These are NOT independently blind evaluations or production guarantees.
