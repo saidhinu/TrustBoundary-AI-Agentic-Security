@@ -1,0 +1,18 @@
+{
+  "suite": "reviewer-adversarial-v1.2.1",
+  "method": "42 manually-authored feedback-informed cases; not blind or production validation",
+  "model": "offline heuristics + local ML; OpenAI disabled",
+  "total_cases": 42,
+  "attack_cases": 24,
+  "benign_cases": 18,
+  "tp": 14,
+  "fn": 10,
+  "fp": 1,
+  "tn": 17,
+  "precision": 0.933,
+  "recall": 0.583,
+  "false_positive_rate": 0.056,
+  "malicious_messages_forwarded_unchanged": 10,
+  "unauthorized_mock_tool_executions": 0,
+  "limitation": "One benign flagged; 10 attacks missed; F3-D1 only. Measurement from local release, not independently replicated from GitHub."
+}
