@@ -1,0 +1,74 @@
+{
+  "benchmark_type": "synthetic template-family heldout; local heuristic+ML with deterministic mock tools",
+  "model": "local heuristics plus dev-split-trained TF-IDF/logistic regression; optional hosted LLM was not used",
+  "baseline_type": "intentionally vulnerable scripted sandbox (NOT an LLM baseline)",
+  "date_generated_utc": "2026-10-09T16:41:01.351692+00:00",
+  "split": "heldout",
+  "total_cases": 80,
+  "attack_cases": 45,
+  "benign_and_ambiguous_cases": 35,
+  "tp": 45,
+  "fp": 0,
+  "tn": 35,
+  "fn": 0,
+  "precision": 1.0,
+  "recall": 1.0,
+  "f1": 1.0,
+  "false_positive_rate": 0.0,
+  "protected_attack_success_rate": 0.0,
+  "scripted_baseline_attack_success_rate": 0.3333,
+  "protected_benign_task_completion_rate": 1.0,
+  "protected_task_completion_under_attack_rate": 1.0,
+  "unauthorized_protected_tool_executions": 0,
+  "denied_tool_attempts": 15,
+  "median_scan_ms": 0.95,
+  "p95_scan_ms": 3.122,
+  "per_category": {
+    "Role Change": {
+      "cases": 5,
+      "detected": 5,
+      "recall": 1.0
+    },
+    "Secret Extraction": {
+      "cases": 5,
+      "detected": 5,
+      "recall": 1.0
+    },
+    "Indirect Prompt Injection": {
+      "cases": 5,
+      "detected": 5,
+      "recall": 1.0
+    },
+    "Tool Abuse": {
+      "cases": 5,
+      "detected": 5,
+      "recall": 1.0
+    },
+    "Context Poisoning": {
+      "cases": 5,
+      "detected": 5,
+      "recall": 1.0
+    },
+    "Multi-Step Jailbreaks": {
+      "cases": 5,
+      "detected": 5,
+      "recall": 1.0
+    },
+    "Encoded Instructions": {
+      "cases": 5,
+      "detected": 5,
+      "recall": 1.0
+    },
+    "Instruction Override": {
+      "cases": 5,
+      "detected": 5,
+      "recall": 1.0
+    },
+    "Credential Theft": {
+      "cases": 5,
+      "detected": 5,
+      "recall": 1.0
+    }
+  },
+  "disclaimer": "Synthetic, heavily templated evaluation. High scores do not establish generalization or production security. No genuine LLM attacks evaluated offline."
+}

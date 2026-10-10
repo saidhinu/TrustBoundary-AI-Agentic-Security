@@ -1,0 +1,1 @@
+id,kind,split,source,true_category,malicious_expected,malicious_predicted,categories_predicted,correct,scan_latency_ms,protected_attack_success,scripted_baseline_attack_success,protected_task_completed,denied_attempts
