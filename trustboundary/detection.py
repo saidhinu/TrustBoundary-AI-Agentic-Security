@@ -19,13 +19,29 @@ TRAINING_QUOTE=re.compile(r'^(?:training note:|security awareness article quotin
 # grant trust to instructions outside that span (CVE-like regression #TB-QUOTE-2).
 QUOTED_SPANS=re.compile(r'("[^"\n]{0,600}"|“[^”\n]{0,600}”)')
 QUOTE_CONTEXT=re.compile(r'\b(?:training note|security awareness|quoting|example|unsafe|attack|explain why|policy says)\b',re.I)
+QUOTE_EXECUTION_DIRECTIVE=re.compile(
+    r'\b(?:carry\s+out|execute|follow|obey|perform|apply|enact|implement|run|do|adopt|comply\s+with)\b'
+    r'(?:(?![.!?]).){0,110}'
+    r'\b(?:quoted|quote|above|preceding|previous|earlier|that|those|this)\b'
+    r'(?:(?![.!?]).){0,65}'
+    r'\b(?:instruction|command|directive|request|step|text|message|one)\b'
+    r'|\b(?:as|per)\s+(?:instructed|directed)\s+(?:in|by)\s+(?:the\s+)?(?:quote|quoted\s+text)\b',
+    re.I|re.S)
+QUOTE_EXECUTION_REVERSE=re.compile(
+    r'\b(?:quoted|above|previous|that|those)\s+(?:instructions?|commands?|directives?|requests?|text)\b'
+    r'(?:(?![.!?]).){0,55}\b(?:must\s+be|should\s+be|needs\s+to\s+be)\s+'
+    r'(?:followed|executed|obeyed|performed|applied)\b',re.I|re.S)
+def actively_references_quoted_instruction(text):
+    outside=QUOTED_SPANS.sub(lambda m:' '*len(m.group(0)),text)
+    return bool(QUOTE_EXECUTION_DIRECTIVE.search(outside) or QUOTE_EXECUTION_REVERSE.search(outside))
+
 def inspectable_text(text):
     """Neutralize an explicitly educational quote while preserving outside text.
 
     Returns text with quoted spans replaced by spaces so pattern offsets are
     preserved. This exemption is never applied to active text outside quotes.
     """
-    if not TRAINING_QUOTE.search(text) or not QUOTE_CONTEXT.search(text):
+    if not TRAINING_QUOTE.search(text) or not QUOTE_CONTEXT.search(text) or actively_references_quoted_instruction(text):
         return text
     return QUOTED_SPANS.sub(lambda m: ' '*len(m.group(0)), text)
 
@@ -138,7 +154,7 @@ class Detector:
                 ai_meta='heuristic_plus_local_ml'
                 # For an unfamiliar malicious-looking text with no taxonomy hit,
                 # quarantine conservatively; no category is invented.
-                if ml_risk>=0.87 and inspected.strip() and not findings and not TRAINING_QUOTE.match(norm):
+                if ml_risk>=0.87 and inspected.strip() and not findings and not (TRAINING_QUOTE.match(norm) and not actively_references_quoted_instruction(norm)):
                     findings['Uncategorized suspicious instruction']=ml_risk
             except Exception:
                 ai_meta='heuristic_fallback_ml_unavailable'
@@ -160,7 +176,13 @@ class Detector:
         severity=('critical' if any(c in categories for c in ['Credential Theft','Tool Abuse','Secret Extraction']) else 'high') if malicious else 'low'
         disposition=('QUARANTINE' if severity=='critical' else 'SANITIZE') if malicious else 'ALLOW'
         if malicious and 'Indirect Prompt Injection' in categories and severity!='critical': disposition='ESCALATE'
-        cleaned=(norm if disposition=='ALLOW' else safe_segments(norm,categories) if disposition=='SANITIZE' else '')
+        cleaned=norm if disposition=='ALLOW' else ''
+        if disposition=='SANITIZE':
+            candidate=safe_segments(norm,categories)
+            if candidate and candidate!=norm:
+                cleaned=candidate
+            else:
+                disposition='QUARANTINE'
         return Decision(source_type=source_type,trust_tier='untrusted_external',source_sha256=raw_hash,
             malicious=malicious,categories=categories,severity=severity,confidence=max(findings.values(),default=.6),
             disposition=disposition,model=ai_meta,evidence=match_evidence,
