@@ -13,7 +13,7 @@ Local source, offline test suite, revised presentation and reproducible evaluato
 - Public external dataset numeric benchmark.
 - Independently sealed holdout evaluation.
 - Publicly hosted authenticated HTTPS demo and signed-out playback.
-- Final narrated **live screen recording in the participant's own voice**. Earlier video is an illustrative screenshot walkthrough.
+- A replacement participant voice-over file is published: [Tustboundary_Voiceover Demo_Final.mov](https://github.com/saidhinu/TrustBoundary-AI-Agentic-Security/blob/main/submission/Tustboundary_Voiceover%20Demo_Final.mov). The old synthetic-voice MP4 has been removed. Anonymous playback and whether this is a live v1.7 screen recording are still unverified.
 - Competition submission and receipt; not included in this development workflow.
 
 Do not interpret this prototype as a production security control.
