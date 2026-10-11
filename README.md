@@ -76,6 +76,6 @@ I used ChatGPT to help draft prototype source code, tests, UI text, architecture
 - `trustboundary/` application, `web/` dashboard, `tests/` regression tests
 - `scripts/` replay and evaluation tools, `reports/` actual measured outcomes
 - `docs/CHANGELOG.md` historical releases and `docs/` technical limitations
-- `submission/` pitch deck and prior narrated walkthrough; see its metadata for the precise version shown
+- `submission/` pitch deck and [participant's final voice-over video](https://github.com/saidhinu/TrustBoundary-AI-Agentic-Security/blob/main/submission/Tustboundary_Voiceover%20Demo_Final.mov); see [video status](submission/VIDEO_STATUS.md) for version and playback caveats
 
 Licensed under [MIT](LICENSE). All data and tool effects are synthetic. Participation and final Unstop form submission are separate from publishing this repository.
